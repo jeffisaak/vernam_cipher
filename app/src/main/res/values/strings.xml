@@ -1,0 +1,92 @@
+<resources>
+    <string name="app_name">Vernam Cipher</string>
+
+    <!-- Main activity -->
+    <string name="action_settings">Settings</string>
+    <string name="action_info">Info</string>
+    <string name="action_help">Help</string>
+
+    <!-- Information activity -->
+    <string name="title_activity_info">Vernam Cipher Questions</string>
+
+    <string name="info_vernam_cipher_title">What is the Vernam Cipher?</string>
+    <string name="info_vernam_cipher_content_1">From Wikipedia (https://en.wikipedia.org/wiki/Gilbert_Vernam#The_Vernam_cipher): \\\'In modern terminology, a Vernam cipher is a symmetrical stream cipher in which the plaintext is combined with a random or pseudorandom stream of data (the keystream\\\") of the same length, to generate the ciphertext, using the Boolean \\\"exclusive or\\\" (XOR) function.\\\'</string>
+    <string name="info_vernam_cipher_content_2">In plain language, the Vernam Cipher is a mechanism for encrypting data that combines the plain text with a randomly-generated secret key character by character to yield a cipher text. To decrypt, the cipher text is combined with the secret key character by character to arrive at the plain text.</string>
+
+    <string name="info_one_time_pad_title">What is a One-Time Pad?</string>
+    <string name="info_one_time_pad_content_1">From Wikipedia (https://en.wikipedia.org/wiki/One-time_pad): In cryptography, the one-time pad (OTP) is an encryption technique that cannot be cracked if used correctly. In this technique, a plaintext is paired with a random secret key (also referred to as a one-time pad). Then, each bit or character of the plaintext is encrypted by combining it with the corresponding bit or character from the pad using modular addition. If the key is truly random, is at least as long as the plaintext, is never reused in whole or in part, and is kept completely secret, then the resulting ciphertext will be impossible to decrypt or break.</string>
+
+    <string name="info_open_source_title">Open source?</string>
+    <string name="info_open_source_content_1">This application is open source. That means that anybody can go look at the source code, and if they want to, use the source code in their own projects. This also means that one can look at the code and see exactly what the application is doing and verify that it isn\'t (for example) sending the passwords it generates back to me, or the NSA, or anywhere. I don\'t trust any security/privacy related application that isn\'t open source, and you shouldn\'t either.</string>
+    <string name="info_open_source_content_2">Please note that the source code has not been audited by an independent third party. If you or your organisation are interested in performing an audit, please contact me, my email address may be found at the bottom of this page.</string>
+    <string name="info_who_title">Who wrote this app?</string>
+    <string name="info_who_content">My name is Jeff Isaak. My background is software development. I am passionate about online security and privacy, personal finance, and garlic. I want to help people reclaim their privacy through clever software. My email address is jisaak@aptasystems.com.</string>
+
+    <!-- Help activity -->
+    <string name="title_activity_help">Vernam Cipher Help</string>
+
+    <!-- Add Secret Key activity -->
+    <string name="title_activity_add_secret_key">New Secret Key</string>
+    <string name="action_done">Done</string>
+
+    <string name="key_length_title">Key length</string>
+    <string name="key_length_content_1">The key is combined with your messages to create a cipher text that can be sent via email. A message can only be as long as your key, and part of the key is consumed with each message.</string>
+    <string name="key_length_content_2">Key length: %1$d average length email(s).</string>
+    <string name="password_title">Password</string>
+    <string name="password_content_1">You may protect the key with a password; if you do not use a password, anyone with physical access to your phone may be able to retrieve, modify, and send messages using your secret keys.</string>
+    <string name="password_content_2">This password must be entered every time you want to use the key to encrypt or decrypt a message.</string>
+    <string name="password_mechanism_diceware">Diceware password generator (most secure)</string>
+    <string name="password_mechanism_enter_password">Enter a password (variable security)</string>
+    <string name="password_mechanism_no_password">No password (least secure)</string>
+    <string name="diceware_password_not_installed_content">To generate a Diceware password, first install the Diceware Password Generator app from the Google Play store by tapping the button below.</string>
+    <string name="diceware_password_content">Tap the generate password button to launch the Diceware Password Generator.</string>
+    <string name="diceware_password_button_not_installed">Install Diceware Password Generator</string>
+    <string name="diceware_password_button">Generate password</string>
+    <string name="password_hint">Password</string>
+    <string name="repeat_password_hint">Repeat password</string>
+    <string name="description_and_colour_title"><![CDATA[Description & colour (optional)]]></string>
+    <string name="description_and_title_content">Giving the key a description and/or colour may make it easier for you to remember which keys are for what purposes. However, if an attacker gains access to your device, it may give them information.</string>
+    <string name="description_hint">Description</string>
+    <string name="colour_black">Black</string>
+    <string name="colour_red">Red</string>
+    <string name="colour_green">Green</string>
+    <string name="colour_blue">Blue</string>
+    <string name="colour_cyan">Cyan</string>
+    <string name="colour_orange">Orange</string>
+    <string name="colour_purple">Purple</string>
+    <string name="colour_grey">Grey</string>
+
+    <!-- Write Message activity -->
+    <string name="title_activity_write_message">New Message</string>
+    <string name="bytes_remaining">%1$s byte(s) remaining</string>
+    <string name="message_too_long">Message exceeds key length</string>
+    <string name="empty_message">The message is empty</string>
+    <string name="incorrect_password">Incorrect password</string>
+    <string name="snackbar_explain_button">Explain</string>
+
+    <!-- Read Message activity -->
+    <string name="title_activity_read_message">Read Message</string>
+
+    <!-- Import Secret key activity -->
+    <string name="title_activity_import_secret_key">Import Secret Key</string>
+    <string name="action_import">Import</string>
+
+    <!-- Decrypt Message activity -->
+    <string name="title_activity_decrypt_message">Decrypt Message</string>
+    <string name="action_decrypt">Decrypt</string>
+
+    <!-- Warning dialogs -->
+    <string name="do_not_show_warning">Do not show this warning again</string>
+    <string name="warning_positive">Continue</string>
+    <string name="warning_negative">Cancel</string>
+
+    <!-- Send message warning dialog -->
+    <string name="send_message_warning_title">Key consumption warning</string>
+    <string name="send_message_warning_text">When you send a message, part of the secret key will be consumed.</string>
+
+    <!-- Decrypt message warning dialog -->
+    <string name="decrypt_message_warning_title">Key consumption warning</string>
+    <string name="decrypt_message_warning_text">When you decrypt a message, part of the secret key will be consumed.</string>
+
+
+</resources>
