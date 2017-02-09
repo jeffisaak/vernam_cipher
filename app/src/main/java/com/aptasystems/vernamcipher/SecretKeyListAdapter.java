@@ -17,8 +17,10 @@ import java.util.List;
 
 public class SecretKeyListAdapter extends ArrayAdapter<SecretKey> {
 
+    private static int layoutId = R.layout.row_secret_key;
+
     public SecretKeyListAdapter(Context context) {
-        super(context, R.layout.row_secret_key);
+        super(context, layoutId);
         refresh();
     }
 
@@ -35,14 +37,15 @@ public class SecretKeyListAdapter extends ArrayAdapter<SecretKey> {
 
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_secret_key, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(layoutId, parent, false);
         }
 
+        // Set the filename text view.
         TextView textView = (TextView) convertView.findViewById(R.id.text_view_filename);
-
         textView.setText(secretKey.getName());
         textView.setTextColor(secretKey.getColour());
 
+        // Set the description if there is one -- don't show the description text view if there isn't one.
         TextView descriptionTextView = (TextView) convertView.findViewById(R.id.text_view_description);
         if (TextUtils.getTrimmedLength(secretKey.getDescription()) == 0) {
             descriptionTextView.setVisibility(View.GONE);
@@ -51,8 +54,11 @@ public class SecretKeyListAdapter extends ArrayAdapter<SecretKey> {
             descriptionTextView.setText(secretKey.getDescription());
         }
 
+        // Set the bytes remaining.
         TextView bytesRemaniningTextView = (TextView) convertView.findViewById(R.id.text_view_bytes_remaining);
-        String bytesRemainingString = String.format(getContext().getResources().getString(R.string.bytes_remaining), NumberFormat.getIntegerInstance().format(secretKey.getBytesRemaining()));
+        String bytesRemainingString =
+                String.format(getContext().getResources().getString(R.string.bytes_remaining),
+                        NumberFormat.getIntegerInstance().format(secretKey.getBytesRemaining()));
         bytesRemaniningTextView.setText(bytesRemainingString);
 
         // Return the completed view to render on screen

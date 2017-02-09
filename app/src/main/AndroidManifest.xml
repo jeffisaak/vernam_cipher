@@ -2,6 +2,7 @@
 <manifest package="com.aptasystems.vernamcipher"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
@@ -11,6 +12,17 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -67,9 +79,8 @@
             android:name=".ImportSecretKeyActivity"
             android:label="@string/title_activity_import_secret_key"
             android:launchMode="singleTask"
-            android:noHistory="true"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter android:label="Vernam Cipher Key Import">
+            <intent-filter android:label="@string/intent_import_key">
                 <action android:name="android.intent.action.VIEW"/>
                 <action android:name="android.intent.action.EDIT"/>
 
@@ -80,7 +91,7 @@
                     android:mimeType="application/octet-stream"
                     android:scheme="content"/>
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:label="@string/intent_import_key">
                 <action android:name="android.intent.action.VIEW"/>
                 <action android:name="android.intent.action.EDIT"/>
 
@@ -90,15 +101,22 @@
                     android:host="*"
                     android:mimeType="application/octet-stream"
                     android:scheme="file"/>
+            </intent-filter>
+            <intent-filter android:label="@string/intent_import_key">
+                <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <data android:mimeType="application/octet-stream"/>
             </intent-filter>
         </activity>
         <activity
             android:name=".DecryptMessageActivity"
             android:label="@string/title_activity_decrypt_message"
             android:launchMode="singleTask"
-            android:noHistory="true"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter android:label="Vernam Cipher Decryption">
+            <intent-filter android:label="@string/intent_decrypt">
                 <action android:name="android.intent.action.VIEW"/>
                 <action android:name="android.intent.action.EDIT"/>
 
@@ -109,7 +127,7 @@
                     android:mimeType="application/octet-stream"
                     android:scheme="content"/>
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:label="@string/intent_decrypt">
                 <action android:name="android.intent.action.VIEW"/>
                 <action android:name="android.intent.action.EDIT"/>
 
@@ -119,6 +137,14 @@
                     android:host="*"
                     android:mimeType="application/octet-stream"
                     android:scheme="file"/>
+            </intent-filter>
+            <intent-filter android:label="@string/intent_decrypt">
+                <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <data android:mimeType="application/octet-stream"/>
             </intent-filter>
         </activity>
     </application>

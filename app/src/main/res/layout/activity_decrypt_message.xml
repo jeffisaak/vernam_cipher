@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:id="@+id/decrypt_message_coordinator"
+    android:id="@+id/layout_coordinator"
     tools:context="com.aptasystems.vernamcipher.DecryptMessageActivity">
 
     <android.support.design.widget.AppBarLayout

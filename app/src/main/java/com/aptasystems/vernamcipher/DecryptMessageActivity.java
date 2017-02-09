@@ -1,63 +1,51 @@
 package com.aptasystems.vernamcipher;
 
-import android.content.ContentResolver;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
-import android.widget.RadioButton;
 import android.widget.Spinner;
 
-import com.aptasystems.vernamcipher.database.MessageDatabase;
 import com.aptasystems.vernamcipher.database.SecretKeyDatabase;
+import com.aptasystems.vernamcipher.model.Message;
 import com.aptasystems.vernamcipher.model.SecretKey;
 import com.aptasystems.vernamcipher.util.Crypto;
-import com.aptasystems.vernamcipher.util.FileManager;
-import com.aptasystems.vernamcipher.util.WarningDialogUtil;
+import com.aptasystems.vernamcipher.util.DialogUtil;
 
 import org.spongycastle.crypto.CryptoException;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DecryptMessageActivity extends AppCompatActivity {
 
     private static final String STATE_SECRET_KEY = "secretKey";
+
+    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+
+    private static final String DECRYPT_MESSAGE_WARNING = "decryptMessageWarning";
+
+    private static final int BYTE_BUFFER_SIZE = 16384;
 
     private CoordinatorLayout _coordinatorLayout;
     private Spinner _keySpinner;
     private SecretKeyListAdapter _keySpinnerAdapter;
     private EditText _keyPasswordEditText;
 
-    // Tracks whether we've just rotated the screen.  Gets set and unset in the beginning and end of onCreate().
-    private boolean _justRotated = false;
-
-    private int _selectedColour;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (savedInstanceState != null) {
-            _justRotated = true;
-        }
 
         setContentView(R.layout.activity_decrypt_message);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -68,16 +56,14 @@ public class DecryptMessageActivity extends AppCompatActivity {
         _keySpinner = (Spinner) findViewById(R.id.key_spinner);
         _keyPasswordEditText = (EditText) findViewById(R.id.key_password_edit_text);
 
+        // Set up the key spinner and select the appropriate entry.
         _keySpinnerAdapter = new SecretKeyListAdapter(this);
         _keySpinner.setAdapter(_keySpinnerAdapter);
-
         int selectedSecretKey = 0;
         if (savedInstanceState != null) {
             selectedSecretKey = savedInstanceState.getInt(STATE_SECRET_KEY, selectedSecretKey);
         }
         _keySpinner.setSelection(selectedSecretKey);
-
-        _justRotated = false;
     }
 
     @Override
@@ -95,6 +81,33 @@ public class DecryptMessageActivity extends AppCompatActivity {
 
     public void decryptMessage(MenuItem menuItem) {
 
+        String action = getIntent().getAction();
+
+        // This list is populated differently depending on the intent action.
+        List<Uri> uris = new ArrayList<>();
+
+        switch (action) {
+            case Intent.ACTION_VIEW:
+            case Intent.ACTION_EDIT:
+                uris.add(getIntent().getData());
+                break;
+            case Intent.ACTION_SEND:
+                // Only streams.
+                uris.add(getIntent().<Uri>getParcelableExtra(Intent.EXTRA_STREAM));
+                break;
+            case Intent.ACTION_SEND_MULTIPLE:
+                // Only streams.
+                uris = getIntent().getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                break;
+        }
+
+        for (Uri uri : uris) {
+            decryptMessage(uri);
+        }
+    }
+
+    private void decryptMessage(Uri uri)
+    {
         // Fetch the secret key.
         SecretKey selectedSecretKey = (SecretKey) _keySpinner.getSelectedItem();
         final SecretKey secretKey = SecretKeyDatabase.getInstance(this).fetch(selectedSecretKey.getId(), true);
@@ -105,9 +118,7 @@ public class DecryptMessageActivity extends AppCompatActivity {
         if (password.length() > 0) {
             try {
                 String salt = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-                javax.crypto.SecretKey
-                        javaSecretKey = Crypto.getSecretKey(password, salt);
-                decryptedKey = Crypto.decryptToByteArray(javaSecretKey, secretKey.getKey());
+                decryptedKey = Crypto.decryptToByteArray(password, salt, secretKey.getKey());
             } catch (CryptoException e) {
 
                 // Decryption failed.  Show a snackbar and put a validation error in the field.
@@ -128,37 +139,33 @@ public class DecryptMessageActivity extends AppCompatActivity {
             key = secretKey.getKey();
         }
 
-
         // Get the message content to decrypt.
         byte[] cipherText = null;
-        Intent intent = getIntent();
-        Uri uri = intent.getData();
-        DataInputStream dis = null;
-        try {
-            dis = new DataInputStream(getContentResolver().openInputStream(uri));
-        } catch (FileNotFoundException e) {
-            // TODO - Smrt.
-            e.printStackTrace();
-        }
-        ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 
-        byte oneByte = -1;
         try {
-            while ((oneByte = (byte) dis.read()) != -1) {
-                byteOutStream.write(oneByte);
+            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+            InputStream inStream = getContentResolver().openInputStream(uri);
+            int nRead;
+            byte[] data = new byte[BYTE_BUFFER_SIZE];
+            while ((nRead = inStream.read(data, 0, data.length)) != -1) {
+                outStream.write(data, 0, nRead);
             }
-            cipherText = byteOutStream.toByteArray();
-            Log.v(getClass().getName(), "Cipher length: " + cipherText.length);
-            dis.close();
+            outStream.flush();
+            cipherText = outStream.toByteArray();
         } catch (IOException e) {
-            // TODO - Smrt.
-            e.printStackTrace();
+            Snackbar snackbar = Snackbar
+                    .make(_coordinatorLayout, R.string.error_reading_cipher_text, Snackbar.LENGTH_LONG);
+            snackbar.show();
         }
 
         // Show a warning dialog.  Maybe.
         final byte[] finalKey = key;
         final byte[] finalCipherText = cipherText;
-        WarningDialogUtil.showDialog(this, R.string.decrypt_message_warning_title, R.string.decrypt_message_warning_text, "decryptMessageWarning", new WarningDialogUtil.WarningDialogCallback() {
+        DialogUtil.showWarningDialog(this,
+                R.string.decrypt_message_warning_title,
+                R.string.decrypt_message_warning_text,
+                DECRYPT_MESSAGE_WARNING,
+                new DialogUtil.WarningDialogCallback() {
             @Override
             public void onProceed() {
                 decryptMessage(secretKey, finalKey, finalCipherText);
@@ -166,38 +173,49 @@ public class DecryptMessageActivity extends AppCompatActivity {
 
             @Override
             public void onCancel() {
-
+                // Noop.
             }
         });
     }
 
-    private void decryptMessage(SecretKey secretKey, byte[] key, byte[] cipherText) {
+    private void decryptMessage(SecretKey secretKey, byte[] key, byte[] ciphertext) {
 
         // Decrypt the message.
-        byte[] clearText = Crypto.vernamCipher(key, cipherText);
+        byte[] cleartext = Crypto.vernamCipher(key, ciphertext);
 
         // Convert to string.
-        String clearTextString = null;
-        try {
-            clearTextString = new String(clearText, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            // TODO - Smrt.
-            e.printStackTrace();
-        }
-
-        // Store the message in the database.
-        long messageId = MessageDatabase.getInstance(this).insert(clearTextString);
+        String cleartextString = new String(cleartext, UTF8_CHARSET);
 
         // Cut off the part of the key that we used and update the secret key.
-        byte[] newKey = new byte[key.length - clearText.length];
-        for (int ii = clearText.length; ii < key.length; ii++) {
-            newKey[ii - clearText.length] = key[ii];
+        byte[] newKey = new byte[key.length - cleartext.length];
+        for (int ii = cleartext.length; ii < key.length; ii++) {
+            newKey[ii - cleartext.length] = key[ii];
         }
-        SecretKeyDatabase.getInstance(this).updateKey(secretKey.getId(), newKey);
+
+        // If there was a password for this key, encrypt the new key before updating it in the database.
+        byte[] keyFinal = null;
+        if (_keyPasswordEditText.getText().toString().length() != 0 ) {
+            String password = _keyPasswordEditText.getText().toString();
+            String salt = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+            try {
+                keyFinal = Crypto.encryptToByteArray(password, salt, newKey);
+            } catch (CryptoException e) {
+                Snackbar.make(_coordinatorLayout, R.string.error_secret_key_encryption_failed, Snackbar.LENGTH_SHORT).show();
+                return;
+            }
+        } else {
+            // Not password-protected.
+            keyFinal = newKey;
+        }
+
+        SecretKeyDatabase.getInstance(this).updateKey(secretKey.getId(), keyFinal, newKey.length);
+
+        // Build the message for the read activity.
+        Message message = new Message(null, true, cleartextString);
 
         // Start the read message activity and finish this one.
         Intent readIntent = new Intent(this, ReadMessageActivity.class);
-        readIntent.putExtra("messageId", messageId);
+        readIntent.putExtra(ReadMessageActivity.EXTRA_KEY_MESSAGE, message);
         startActivity(readIntent);
         finish();
     }

@@ -2,10 +2,18 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.aptasystems.vernamcipher.WriteMessageActivity">
+
+    <item
+        android:icon="@drawable/ic_help_outline_white_24dp"
+        android:onClick="showHelpActivity"
+        android:orderInCategory="90"
+        android:title="@string/action_help"
+        app:showAsAction="always"/>
+
     <item
         android:icon="@drawable/ic_send_white_24dp"
         android:onClick="sendMessage"
         android:orderInCategory="100"
         android:title="Send"
-        app:showAsAction="always|withText"/>
+        app:showAsAction="always"/>
 </menu>

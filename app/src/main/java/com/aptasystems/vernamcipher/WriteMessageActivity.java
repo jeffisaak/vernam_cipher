@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -14,14 +15,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.aptasystems.vernamcipher.database.MessageDatabase;
 import com.aptasystems.vernamcipher.database.SecretKeyDatabase;
 import com.aptasystems.vernamcipher.model.SecretKey;
 import com.aptasystems.vernamcipher.util.Crypto;
 import com.aptasystems.vernamcipher.util.FileManager;
-import com.aptasystems.vernamcipher.util.WarningDialogUtil;
+import com.aptasystems.vernamcipher.util.DialogUtil;
+import com.aptasystems.vernamcipher.util.ShareUtil;
 
 import org.spongycastle.crypto.CryptoException;
 
@@ -29,12 +33,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class WriteMessageActivity extends AppCompatActivity {
 
-    private static final String STRING_ENCODING = "UTF-8";
+    public static final String EXTRA_KEY_SECRET_KEY = "secretKey";
+
+    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
     private CoordinatorLayout _coordinatorLayout;
     private TextView _nameTextView;
@@ -42,9 +53,13 @@ public class WriteMessageActivity extends AppCompatActivity {
     private TextView _bytesRemainingTextView;
     private EditText _keyPasswordEditText;
     private EditText _contentEditText;
+    private CheckBox _saveCopyCheckBox;
 
     private int _secretKeyLength;
     private int originalBytesRemainingColor;
+
+    private int _currentRequestCode;
+    private Map<Integer, List<File>> _fileMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +69,10 @@ public class WriteMessageActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // TODO - Hardcoded string.
-        SecretKey secretKey = (SecretKey) getIntent().getSerializableExtra("secretKey");
+        _currentRequestCode = 1;
+        _fileMap = new HashMap<>();
+
+        SecretKey secretKey = (SecretKey) getIntent().getSerializableExtra(EXTRA_KEY_SECRET_KEY);
 
         _coordinatorLayout = (CoordinatorLayout) findViewById(R.id.layout_coordinator);
         _nameTextView = (TextView) findViewById(R.id.text_view_filename);
@@ -63,6 +80,7 @@ public class WriteMessageActivity extends AppCompatActivity {
         _bytesRemainingTextView = (TextView) findViewById(R.id.text_view_bytes_remaining);
         _keyPasswordEditText = (EditText) findViewById(R.id.key_password_edit_text);
         _contentEditText = (EditText) findViewById(R.id.message_edit_text);
+        _saveCopyCheckBox = (CheckBox) findViewById(R.id.check_box_save_message_copy);
 
         _nameTextView.setText(secretKey.getName());
         _nameTextView.setTextColor(secretKey.getColour());
@@ -95,24 +113,19 @@ public class WriteMessageActivity extends AppCompatActivity {
                 // Convert the message to bytes.
                 String messageContent = s.toString();
                 byte[] clearText = null;
-                try {
-                    clearText = messageContent.getBytes(STRING_ENCODING);
-                } catch (UnsupportedEncodingException e) {
-                    // TODO - Do something smrt.
-                    e.printStackTrace();
-                }
+                clearText = messageContent.getBytes(UTF8_CHARSET);
 
                 int bytesRemaining = _secretKeyLength - clearText.length;
                 if (bytesRemaining < 0) {
                     _bytesRemainingTextView.setText(getResources().getString(R.string.message_too_long));
-                    _bytesRemainingTextView.setTextColor(getResources().getColor(R.color.error_label));
+                    _bytesRemainingTextView.setTextColor(ContextCompat.getColor(WriteMessageActivity.this, R.color.error_label));
                 } else {
 
                     String bytesRemainingString = String.format(getResources().getString(R.string.bytes_remaining), NumberFormat.getIntegerInstance().format(bytesRemaining));
                     _bytesRemainingTextView.setText(bytesRemainingString);
 
                     if (bytesRemaining == 0) {
-                        _bytesRemainingTextView.setTextColor(getResources().getColor(R.color.warning_label));
+                        _bytesRemainingTextView.setTextColor(ContextCompat.getColor(WriteMessageActivity.this, R.color.warning_label));
                     } else {
                         _bytesRemainingTextView.setTextColor(originalBytesRemainingColor);
                     }
@@ -141,8 +154,42 @@ public class WriteMessageActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void toggleSaveMessage(View view) {
+        boolean checked = _saveCopyCheckBox.isChecked();
+
+        if (checked) {
+            DialogUtil.showWarningDialog(this, R.string.save_message_copy_warning_title, R.string.save_message_copy_warning_text, "saveCopyWarning", new DialogUtil.WarningDialogCallback() {
+                @Override
+                public void onProceed() {
+                    // Noop.
+                }
+
+                @Override
+                public void onCancel() {
+                    // Uncheck the checkbox.
+                    _saveCopyCheckBox.setChecked(false);
+                }
+            });
+        }
+    }
+
+    public void showHelpActivity(MenuItem menuItem) {
+        Intent intent = new Intent(this, HelpActivity.class);
+        intent.putExtra(HelpActivity.EXTRA_KEY_SOURCE, this.getClass().getName());
+        startActivity(intent);
+    }
 
     public void sendMessage(MenuItem menuItem) {
+
+        // We need to ensure that external storage is available and writable before we continue.
+        FileManager.StorageState storageState = FileManager.getInstance(this).getExternalStorageState();
+        if (storageState == FileManager.StorageState.READ_ONLY) {
+            Snackbar.make(_coordinatorLayout, R.string.toast_external_storage_read_only_send_message, Snackbar.LENGTH_LONG).show();
+            return;
+        } else if (storageState == FileManager.StorageState.NOT_AVAILABLE) {
+            Snackbar.make(_coordinatorLayout, R.string.toast_external_storage_not_available_send_message, Snackbar.LENGTH_LONG).show();
+            return;
+        }
 
         // First ensure that there was content entered.
         String message = _contentEditText.getText().toString();
@@ -152,32 +199,25 @@ public class WriteMessageActivity extends AppCompatActivity {
             return;
         }
 
-        // Convert the message to bytes using UTF-8 encoding.
+        // Convert the message to bytes.
         String messageContent = _contentEditText.getText().toString();
-        byte[] clearText = null;
-        try {
-            // TODO - hardcoded.
-            clearText = messageContent.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            // TODO - Do something smrt.
-            e.printStackTrace();
-        }
+        byte[] clearText = messageContent.getBytes(UTF8_CHARSET);
         int bytesRemaining = _secretKeyLength - clearText.length;
 
         // Ensure our message isn't too long.
         if (bytesRemaining < 0) {
+            // TODO - Add an action?
             Snackbar.make(_coordinatorLayout, R.string.message_too_long, Snackbar.LENGTH_SHORT)
-                    .setAction(R.string.snackbar_explain_button, new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            // TODO - Write me.
-                        }
-                    }).show();
+//                    .setAction(R.string.snackbar_explain_button, new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                        }
+//                    })
+                    .show();
             return;
         }
 
-        // TODO - Hardcoded string.
-        final SecretKey secretKey = (SecretKey) getIntent().getSerializableExtra("secretKey");
+        final SecretKey secretKey = (SecretKey) getIntent().getSerializableExtra(EXTRA_KEY_SECRET_KEY);
 
         // Attempt to decrypt the key if a password is provided.  If that fails, we can't go further.
         byte[] decryptedData = null;
@@ -185,9 +225,7 @@ public class WriteMessageActivity extends AppCompatActivity {
         if (password.length() > 0) {
             try {
                 String salt = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-                javax.crypto.SecretKey
-                        javaSecretKey = Crypto.getSecretKey(password, salt);
-                decryptedData = Crypto.decryptToByteArray(javaSecretKey, secretKey.getKey());
+                decryptedData = Crypto.decryptToByteArray(password, salt, secretKey.getKey());
             } catch (CryptoException e) {
 
                 // Decryption failed.  Show a snackbar and put a validation error in the field.
@@ -211,7 +249,7 @@ public class WriteMessageActivity extends AppCompatActivity {
         // Show a warning dialog.  Maybe.
         final byte[] finalKey = key;
         final byte[] finalClearText = clearText;
-        WarningDialogUtil.showDialog(this, R.string.send_message_warning_title, R.string.send_message_warning_text, "sendMessageWarning", new WarningDialogUtil.WarningDialogCallback() {
+        DialogUtil.showWarningDialog(this, R.string.send_message_warning_title, R.string.send_message_warning_text, "sendMessageWarning", new DialogUtil.WarningDialogCallback() {
             @Override
             public void onProceed() {
                 sendMessage(secretKey, finalKey, finalClearText);
@@ -219,7 +257,7 @@ public class WriteMessageActivity extends AppCompatActivity {
 
             @Override
             public void onCancel() {
-
+                // Noop.
             }
         });
     }
@@ -239,34 +277,58 @@ public class WriteMessageActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        Log.v(getClass().getName(), "File length: " + messageFile.length());
+        // Put the file in the file map so we can delete it afterwards.
+        List<File> files = new ArrayList<>();
+        files.add(messageFile);
+        _fileMap.put(_currentRequestCode, files);
 
         // Cut off the part of the key that we used and update the secret key.
         byte[] newKey = new byte[key.length - clearText.length];
         for (int ii = clearText.length; ii < key.length; ii++) {
             newKey[ii - clearText.length] = key[ii];
         }
-        SecretKeyDatabase.getInstance(this).updateKey(secretKey.getId(), newKey);
+
+        // If there was a password for this key, encrypt the new key before updating it in the database.
+        byte[] keyFinal = null;
+        if (_keyPasswordEditText.getText().toString().length() != 0) {
+            String password = _keyPasswordEditText.getText().toString();
+            String salt = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+            try {
+                keyFinal = Crypto.encryptToByteArray(password, salt, newKey);
+            } catch (CryptoException e) {
+                // TODO: Handle exception.
+                e.printStackTrace();
+            }
+        } else {
+            // Not password-protected.
+            keyFinal = newKey;
+        }
+
+        SecretKeyDatabase.getInstance(this).updateKey(secretKey.getId(), keyFinal, newKey.length);
+
+        // Optionally save a copy of the message.
+        if (_saveCopyCheckBox.isChecked()) {
+            MessageDatabase.getInstance(this).insert(false, _contentEditText.getText().toString());
+        }
 
         // Share.
-        Intent shareIntent = buildShareIntent(messageFile);
-//            startActivityForResult(shareIntent, ACTIVITY_SHARE);
-        startActivity(shareIntent);
-
-        finish();
-
+        Intent shareIntent = ShareUtil.buildShareIntent(this, messageFile);
+        startActivityForResult(shareIntent, _currentRequestCode++);
     }
 
-    private Intent buildShareIntent(File file) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        // Set up our share intent with the currently selected files.
-        Intent shareIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-
-        ArrayList<Uri> uris = new ArrayList<Uri>();
-        uris.add(Uri.fromFile(file));
-        shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        shareIntent.setType("application/octet-stream");
-        return shareIntent;
+        // Delete the files that were shared.
+        if (_fileMap.containsKey(requestCode)) {
+            List<File> files = _fileMap.remove(requestCode);
+            for (File file : files) {
+                if (file.exists()) {
+                    file.delete();
+                }
+            }
+        }
+        finish();
     }
 
 }

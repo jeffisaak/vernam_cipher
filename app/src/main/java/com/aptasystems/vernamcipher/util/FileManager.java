@@ -1,13 +1,13 @@
 package com.aptasystems.vernamcipher.util;
 
 import android.content.Context;
-import android.util.Log;
+import android.os.Environment;
 
 import java.io.File;
 import java.util.UUID;
 
 /**
- * Created by jisaak on 2015-11-24.
+ * Provides file utility.
  */
 public class FileManager {
 
@@ -20,24 +20,67 @@ public class FileManager {
         return _instance;
     }
 
+    private static final String TEMPORARY_FOLDER = "temp";
     private File _tempFolder;
 
     private FileManager(Context context) {
-        // TODO - Constants.
-        _tempFolder = new File(context.getExternalFilesDir(null), "temp");
+        _tempFolder = new File(context.getExternalFilesDir(null), TEMPORARY_FOLDER);
     }
 
+    /**
+     * Create a new temporary file in external storage with the given name.  This method does NOT
+     * check whether external storage is available.
+     *
+     * @param name
+     * @return
+     */
     public File newTempFile(String name) {
         if (!_tempFolder.exists()) {
             _tempFolder.mkdirs();
         }
         File result = new File(_tempFolder, name);
-        Log.v(getClass().getSimpleName(), "" + result.exists());
         return result;
     }
 
+    /**
+     * Create a new temporary file in external storage.  This method does NOT check whether external
+     * storage is available.
+     *
+     * @return
+     */
     public File newTempFile() {
         return newTempFile(UUID.randomUUID().toString());
     }
 
+    /**
+     * Cleans up all the temporary files older than a threshold.
+     */
+    public void cleanup() {
+        Runnable cleanupRunnable = new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        };
+        new Thread(cleanupRunnable).start();
+    }
+
+    /**
+     * Get the external storage state.
+     *
+     * @return
+     */
+    public StorageState getExternalStorageState() {
+        StorageState result = StorageState.NOT_AVAILABLE;
+
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.compareTo(state) == 0) {
+            result = StorageState.WRITABLE;
+        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.compareTo(state) == 0) {
+            result = StorageState.READ_ONLY;
+        }
+        return result;
+    }
+
+    public static enum StorageState {NOT_AVAILABLE, WRITABLE, READ_ONLY}
 }

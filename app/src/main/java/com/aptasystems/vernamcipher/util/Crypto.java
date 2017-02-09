@@ -18,14 +18,16 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * Provides cryptographic utility.
+ */
 public class Crypto {
 
-    public static final String PROVIDER = "BC";
-    public static final int SALT_LENGTH = 9;
-    public static final int IV_LENGTH = 16;
-    public static final int PBE_ITERATION_COUNT = 100;
+    private static final String PROVIDER = "BC";
+    private static final int IV_LENGTH = 16;
+    private static final int PBE_ITERATION_COUNT = 100;
+    private static final int PBE_KEY_LENGTH = 256;
 
-    private static final String HASH_ALGORITHM = "SHA-512";
     private static final String PBE_ALGORITHM = "PBEWithSHA256And256BitAES-CBC-BC";
     private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
     private static final String SECRET_KEY_ALGORITHM = "AES";
@@ -50,136 +52,111 @@ public class Crypto {
         return output;
     }
 
-    public static byte[] encryptToByteArray(SecretKey secret, byte[] cleartext) throws CryptoException {
-        try {
+    /**
+     * Encrypt a byte array using the specified password and salt; return the result in a byte
+     * array.
+     *
+     * @param password
+     * @param salt
+     * @param cleartext
+     * @return
+     * @throws CryptoException
+     */
+    public static byte[] encryptToByteArray(String password, String salt, byte[] cleartext) throws CryptoException {
+        SecretKey secretKey = Crypto.buildSecretKey(password, salt);
+        return encryptToByteArray(secretKey, cleartext);
+    }
 
+    /**
+     * Decrypt a byte array using the specified password and salt; return the result in a byte
+     * array.
+     *
+     * @param password
+     * @param salt
+     * @param ciphertext
+     * @return
+     * @throws CryptoException
+     */
+    public static byte[] decryptToByteArray(String password, String salt, byte[] ciphertext) throws CryptoException {
+        SecretKey secretKey = Crypto.buildSecretKey(password, salt);
+        return decryptToByteArray(secretKey, ciphertext);
+    }
+
+    /**
+     * Encrypt a byte array using the specified secret key; return the result in a byte array.
+     *
+     * @param secret
+     * @param cleartext
+     * @return
+     * @throws CryptoException
+     */
+    private static byte[] encryptToByteArray(SecretKey secret, byte[] cleartext) throws CryptoException {
+        try {
             byte[] iv = generateIv();
-            IvParameterSpec ivspec = new IvParameterSpec(iv);
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 
             Cipher encryptionCipher = Cipher.getInstance(CIPHER_ALGORITHM, PROVIDER);
-            encryptionCipher.init(Cipher.ENCRYPT_MODE, secret, ivspec);
-            byte[] encryptedText = encryptionCipher.doFinal(cleartext);
+            encryptionCipher.init(Cipher.ENCRYPT_MODE, secret, ivParameterSpec);
+            byte[] ciphertext = encryptionCipher.doFinal(cleartext);
 
-            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-            outStream.write(iv);
-            outStream.write(encryptedText);
-            outStream.flush();
-            outStream.close();
-            return outStream.toByteArray();
-
-        } catch (Exception e) {
-            throw new CryptoException("Unable to encrypt", e);
-        }
-    }
-
-    public static String encrypt(SecretKey secret, byte[] cleartext) throws CryptoException {
-        try {
-
-            byte[] iv = generateIv();
-            String ivHex = Hex.toHexString(iv);
-            IvParameterSpec ivspec = new IvParameterSpec(iv);
-
-            Cipher encryptionCipher = Cipher.getInstance(CIPHER_ALGORITHM, PROVIDER);
-            encryptionCipher.init(Cipher.ENCRYPT_MODE, secret, ivspec);
-            byte[] encryptedText = encryptionCipher.doFinal(cleartext);
-            String encryptedHex = Hex.toHexString(encryptedText);
-
-            return ivHex + encryptedHex;
+            ByteArrayOutputStream ciphertextOutputStream = new ByteArrayOutputStream();
+            ciphertextOutputStream.write(iv);
+            ciphertextOutputStream.write(ciphertext);
+            ciphertextOutputStream.flush();
+            ciphertextOutputStream.close();
+            return ciphertextOutputStream.toByteArray();
 
         } catch (Exception e) {
-            throw new CryptoException("Unable to encrypt", e);
+            throw new CryptoException("Encryption error", e);
         }
     }
 
-    public static String encrypt(SecretKey secret, String cleartext) throws CryptoException {
-        try {
-            return encrypt(secret, cleartext.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new CryptoException("Unable to encrypt", e);
-        }
-    }
-
-    public static byte[] decryptToByteArray(SecretKey secret, byte[] encrypted) throws CryptoException {
+    /**
+     * Decrypt a byte array using the specified secret key; return the result in a byte array.
+     *
+     * @param secret
+     * @param ciphertext
+     * @return
+     * @throws CryptoException
+     */
+    private static byte[] decryptToByteArray(SecretKey secret, byte[] ciphertext) throws CryptoException {
         try {
             Cipher decryptionCipher = Cipher.getInstance(CIPHER_ALGORITHM, PROVIDER);
 
             ByteArrayOutputStream ivStream = new ByteArrayOutputStream();
-            ivStream.write(encrypted, 0, IV_LENGTH);
+            ivStream.write(ciphertext, 0, IV_LENGTH);
 
             ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-            dataStream.write(encrypted, IV_LENGTH, encrypted.length - IV_LENGTH);
+            dataStream.write(ciphertext, IV_LENGTH, ciphertext.length - IV_LENGTH);
 
             byte[] iv = ivStream.toByteArray();
             byte[] data = dataStream.toByteArray();
 
             IvParameterSpec ivspec = new IvParameterSpec(iv);
             decryptionCipher.init(Cipher.DECRYPT_MODE, secret, ivspec);
-            byte[] decrypted = decryptionCipher.doFinal(data);
-            return decrypted;
+            byte[] cleartext = decryptionCipher.doFinal(data);
+            return cleartext;
         } catch (Exception e) {
-            throw new CryptoException("Unable to decrypt", e);
-        }
-
-    }
-
-    public static String decrypt(SecretKey secret, String encrypted) throws CryptoException {
-        try {
-            Cipher decryptionCipher = Cipher.getInstance(CIPHER_ALGORITHM, PROVIDER);
-            String ivHex = encrypted.substring(0, IV_LENGTH * 2);
-            String encryptedHex = encrypted.substring(IV_LENGTH * 2);
-            IvParameterSpec ivspec = new IvParameterSpec(Hex.decode(ivHex));
-            decryptionCipher.init(Cipher.DECRYPT_MODE, secret, ivspec);
-            byte[] decryptedText = decryptionCipher.doFinal(Hex.decode(encryptedHex));
-            String decrypted = new String(decryptedText, "UTF-8");
-            return decrypted;
-        } catch (Exception e) {
-            throw new CryptoException("Unable to decrypt", e);
+            throw new CryptoException("Decryption error", e);
         }
     }
 
-    public static String decrypt(SecretKey secret, byte[] encrypted) throws CryptoException {
+    /**
+     * Build a secret key from a password and salt.
+     * @param password
+     * @param salt
+     * @return
+     * @throws CryptoException
+     */
+    private static SecretKey buildSecretKey(String password, String salt) throws CryptoException {
         try {
-            return decrypt(secret, new String(encrypted, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new CryptoException("Unable to decrypt", e);
-        }
-    }
-
-
-    public static SecretKey getSecretKey(String password, String salt) throws CryptoException {
-        try {
-            PBEKeySpec pbeKeySpec = new PBEKeySpec(password.toCharArray(), Hex.decode(salt), PBE_ITERATION_COUNT, 256);
+            PBEKeySpec pbeKeySpec = new PBEKeySpec(password.toCharArray(), Hex.decode(salt), PBE_ITERATION_COUNT, PBE_KEY_LENGTH);
             SecretKeyFactory factory = SecretKeyFactory.getInstance(PBE_ALGORITHM, PROVIDER);
             SecretKey tmp = factory.generateSecret(pbeKeySpec);
             SecretKey secret = new SecretKeySpec(tmp.getEncoded(), SECRET_KEY_ALGORITHM);
             return secret;
         } catch (Exception e) {
-            throw new CryptoException("Unable to get secret key", e);
-        }
-    }
-
-    // TODO - Clean up, constants, etc.
-
-    public static String getHash(String password, String salt) throws CryptoException {
-        try {
-            String input = password + salt;
-            MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM, PROVIDER);
-            byte[] out = md.digest(input.getBytes("UTF-8"));
-            return Hex.toHexString(out);
-        } catch (Exception e) {
-            throw new CryptoException("Unable to get hash", e);
-        }
-    }
-
-    public static String generateSalt() throws CryptoException {
-        try {
-            SecureRandom random = new SecureRandom();
-            byte[] salt = new byte[SALT_LENGTH];
-            random.nextBytes(salt);
-            String saltHex = Hex.toHexString(salt);
-            return saltHex;
-        } catch (Exception e) {
-            throw new CryptoException("Unable to generate salt", e);
+            throw new CryptoException("Secret key error", e);
         }
     }
 

@@ -37,5 +37,13 @@
             android:ems="10"
             android:hint="Compose message"
             android:inputType="textCapSentences|textAutoCorrect|textMultiLine"/>
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:id="@+id/check_box_save_message_copy"
+            android:layout_height="wrap_content"
+            android:onClick="toggleSaveMessage"
+            android:text="Save a copy of this message"/>
+
     </LinearLayout>
 </ScrollView>

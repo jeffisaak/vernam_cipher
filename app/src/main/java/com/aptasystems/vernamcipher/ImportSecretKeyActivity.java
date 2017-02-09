@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -29,8 +30,10 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.aptasystems.vernamcipher.database.SecretKeyDatabase;
 import com.aptasystems.vernamcipher.util.Crypto;
+import com.aptasystems.vernamcipher.util.FileManager;
 
 import org.spongycastle.crypto.CryptoException;
 
@@ -39,6 +42,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.crypto.SecretKey;
@@ -50,7 +56,6 @@ public class ImportSecretKeyActivity extends AppCompatActivity {
 
     private static final String PREF_COLOUR = "defaultColour";
 
-    private CoordinatorLayout _coordinatorLayout;
     private EditText _descriptionEditText;
     private RadioButton _colourBlackRadioButton;
     private RadioButton _colourRedRadioButton;
@@ -79,7 +84,6 @@ public class ImportSecretKeyActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         // Grab widgets to use later.
-        _coordinatorLayout = (CoordinatorLayout) findViewById(R.id.layout_coordinator);
         _colourBlackRadioButton = (RadioButton) findViewById(R.id.colour_black);
         _colourRedRadioButton = (RadioButton) findViewById(R.id.colour_red);
         _colourGreenRadioButton = (RadioButton) findViewById(R.id.colour_green);
@@ -91,14 +95,14 @@ public class ImportSecretKeyActivity extends AppCompatActivity {
         _descriptionEditText = (EditText) findViewById(R.id.text_view_description);
 
         // Set our colours in the colour radio button's tags.
-        _colourBlackRadioButton.setTag(getResources().getColor(R.color.key_black));
-        _colourRedRadioButton.setTag(getResources().getColor(R.color.key_red));
-        _colourGreenRadioButton.setTag(getResources().getColor(R.color.key_green));
-        _colourBlueRadioButton.setTag(getResources().getColor(R.color.key_blue));
-        _colourCyanRadioButton.setTag(getResources().getColor(R.color.key_cyan));
-        _colourOrangeRadioButton.setTag(getResources().getColor(R.color.key_orange));
-        _colourPurpleRadioButton.setTag(getResources().getColor(R.color.key_purple));
-        _colourGreyRadioButton.setTag(getResources().getColor(R.color.key_grey));
+        _colourBlackRadioButton.setTag(ContextCompat.getColor(this, R.color.key_black));
+        _colourRedRadioButton.setTag(ContextCompat.getColor(this, R.color.key_red));
+        _colourGreenRadioButton.setTag(ContextCompat.getColor(this, R.color.key_green));
+        _colourBlueRadioButton.setTag(ContextCompat.getColor(this, R.color.key_blue));
+        _colourCyanRadioButton.setTag(ContextCompat.getColor(this, R.color.key_cyan));
+        _colourOrangeRadioButton.setTag(ContextCompat.getColor(this, R.color.key_orange));
+        _colourPurpleRadioButton.setTag(ContextCompat.getColor(this, R.color.key_purple));
+        _colourGreyRadioButton.setTag(ContextCompat.getColor(this, R.color.key_grey));
 
         int colourRadioButtonChecked = R.id.colour_black;
         if (savedInstanceState != null) {
@@ -173,21 +177,48 @@ public class ImportSecretKeyActivity extends AppCompatActivity {
         }
     }
 
-    // TODO - Hardcoded strings.
     public void importKey(MenuItem menuItem) {
 
-        // Get the key from the intent.
+        String action = getIntent().getAction();
+
+        // This list is populated differently depending on the intent action.
+        List<Uri> uris = new ArrayList<>();
+
+        switch (action) {
+            case Intent.ACTION_VIEW:
+            case Intent.ACTION_EDIT:
+                uris.add(getIntent().getData());
+                break;
+            case Intent.ACTION_SEND:
+                // Only streams.
+                uris.add(getIntent().<Uri>getParcelableExtra(Intent.EXTRA_STREAM));
+                break;
+            case Intent.ACTION_SEND_MULTIPLE:
+                // Only streams.
+                uris = getIntent().getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                break;
+        }
+
+        for (Uri uri : uris) {
+            importKey(uri);
+        }
+    }
+
+    private void importKey(Uri uri) {
         byte[] keyData = null;
-        Intent inputIntent = getIntent();
-        Uri uri = inputIntent.getData();
         BufferedInputStream inStream = null;
-        // DataInputStream dis = null;
         try {
             inStream = new BufferedInputStream(getContentResolver().openInputStream(uri));
-            // dis = new DataInputStream(getContentResolver().openInputStream(uri));
         } catch (FileNotFoundException e) {
-            // TODO - Smrt.
-            e.printStackTrace();
+            // Show an alert and return.
+            String content = String.format(getResources().getString(R.string.import_key_error_alert_content), e.getMessage());
+            MaterialDialog dialog = new MaterialDialog.Builder(this)
+                    .title(R.string.import_key_error_alert_title)
+                    .content(content)
+                    .positiveText(android.R.string.ok)
+                    .build();
+            dialog.show();
+            return;
         }
         ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 
@@ -197,19 +228,24 @@ public class ImportSecretKeyActivity extends AppCompatActivity {
                 byteOutStream.write((byte) oneByte);
             }
             keyData = byteOutStream.toByteArray();
-            Log.v(getClass().getName(), "Key length: " + keyData.length);
             inStream.close();
         } catch (IOException e) {
-            // TODO - Smrt.
-            e.printStackTrace();
+            // Show an alert and return.
+            String content = String.format(getResources().getString(R.string.import_key_error_alert_content), e.getMessage());
+            MaterialDialog dialog = new MaterialDialog.Builder(this)
+                    .title(R.string.import_key_error_alert_title)
+                    .content(content)
+                    .positiveText(android.R.string.ok)
+                    .build();
+            dialog.show();
+            return;
         }
 
         // Get the filename.
         String filename = null;
-        Log.v(getClass().getName(), uri.getLastPathSegment());
         if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
-            String[] proj = {MediaStore.MediaColumns.DISPLAY_NAME};
-            Cursor cursor = getContentResolver().query(uri, proj, null, null, null);
+            String[] projection = {MediaStore.MediaColumns.DISPLAY_NAME};
+            Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
             if (cursor != null && cursor.getCount() != 0) {
                 int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME);
                 cursor.moveToFirst();
@@ -220,7 +256,11 @@ public class ImportSecretKeyActivity extends AppCompatActivity {
             }
         } else if (ContentResolver.SCHEME_FILE.equals(uri.getScheme())) {
             filename = uri.getLastPathSegment();
+        }
 
+        // If there is a semicolon in the filename, strip it and everything before it.
+        if (filename.indexOf(";") > 0) {
+            filename = filename.substring(filename.indexOf(";")+1);
         }
 
         // Get the selected colour.
@@ -229,9 +269,6 @@ public class ImportSecretKeyActivity extends AppCompatActivity {
         // Insert the key into the database.
         SecretKeyDatabase.getInstance(this).insert(filename, colour, _descriptionEditText.getText().toString(), keyData);
 
-        // Go to the main activity.
-//        Intent intent = new Intent(this, MainActivity.class);
-//        startActivity(intent);
         finish();
     }
 

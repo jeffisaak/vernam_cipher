@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.SecureRandom;
@@ -42,6 +43,8 @@ public final class PRNGFixes {
     private static final int VERSION_CODE_JELLY_BEAN_MR2 = 18;
     private static final byte[] BUILD_FINGERPRINT_AND_DEVICE_SERIAL =
             getBuildFingerprintAndDeviceSerial();
+
+    private final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
     /**
      * Hidden constructor to prevent instantiation.

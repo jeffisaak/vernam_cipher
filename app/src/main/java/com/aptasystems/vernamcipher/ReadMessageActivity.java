@@ -13,8 +13,12 @@ import android.widget.TextView;
 
 import com.aptasystems.vernamcipher.database.MessageDatabase;
 import com.aptasystems.vernamcipher.model.Message;
+import com.aptasystems.vernamcipher.util.ShareUtil;
 
 public class ReadMessageActivity extends AppCompatActivity {
+
+    public static final String EXTRA_KEY_MESSAGE_ID = "messageId";
+    public static final String EXTRA_KEY_MESSAGE = "message";
 
     private TextView _contentView;
 
@@ -24,14 +28,24 @@ public class ReadMessageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_read_message);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        // TODO - set home up enabled but only if we're not coming from the decrypt...
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         _contentView = (TextView) findViewById(R.id.message_content);
 
-        long messageId = getIntent().getLongExtra("messageId", 0L);
-        Message message = MessageDatabase.getInstance(this).fetch(messageId);
+        long messageId = getIntent().getLongExtra(EXTRA_KEY_MESSAGE_ID, 0L);
+        Message message = null;
+        if (messageId == 0L) {
+            message = (Message) getIntent().getSerializableExtra(EXTRA_KEY_MESSAGE);
+        } else {
+            message = MessageDatabase.getInstance(this).fetch(messageId);
+        }
         _contentView.setText(message.getContent());
+        if( message.isIncoming())
+        {
+            setTitle(R.string.title_activity_read_received_message);
+        } else {
+            setTitle(R.string.title_activity_read_sent_message);
+        }
     }
 
     @Override
@@ -39,6 +53,13 @@ public class ReadMessageActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_read_message, menu);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        long messageId = getIntent().getLongExtra(EXTRA_KEY_MESSAGE_ID, 0L);
+        menu.findItem(R.id.action_save_message).setVisible(messageId == 0L);
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -54,19 +75,22 @@ public class ReadMessageActivity extends AppCompatActivity {
     }
 
     public void shareMessage(MenuItem menuItem) {
-        Intent shareIntent = buildShareIntent();
+        Intent shareIntent = ShareUtil.buildShareIntent( _contentView.getText().toString());
         startActivity(shareIntent);
     }
 
-    private Intent buildShareIntent() {
-        Intent result = new Intent();
-        result.setAction(Intent.ACTION_SEND);
-        result.putExtra(Intent.EXTRA_TEXT, _contentView.getText().toString());
-        result.setType("text/plain");
-        return result;
+    public void showHelpActivity(MenuItem menuItem) {
+        Intent intent = new Intent(this, HelpActivity.class);
+        intent.putExtra(HelpActivity.EXTRA_KEY_SOURCE, this.getClass().getName());
+        startActivity(intent);
     }
 
-    public void showHelp(MenuItem menuItem) {
+    public void saveMessage(MenuItem menuItem) {
+        // Store the message in the database, then put the message id in the extra.
+        Message message = (Message) getIntent().getSerializableExtra(EXTRA_KEY_MESSAGE);
+        long messageId = MessageDatabase.getInstance(this).insert(true, message.getContent());
+        getIntent().putExtra(EXTRA_KEY_MESSAGE_ID, messageId);
+        invalidateOptionsMenu();
     }
 
 }

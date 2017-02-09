@@ -24,8 +24,8 @@ public class SecretKeyDatabase extends AbstractDatabase {
         return _instance;
     }
 
+    // Define our table name and columns.
     private static final String TABLE = "secretKey";
-    private static final String ID = "_id";
     private static final String NAME = "name";
     private static final String COLOUR = "colour";
     private static final String DESCRIPTION = "description";
@@ -35,6 +35,7 @@ public class SecretKeyDatabase extends AbstractDatabase {
     private static final String[] ALL_COLUMNS = new String[]{ID, NAME, COLOUR, DESCRIPTION, KEY, BYTES_REMAINING};
     private static final String[] ALL_COLUMNS_BUT_KEY = new String[]{ID, NAME, COLOUR, DESCRIPTION, BYTES_REMAINING};
 
+    // Uses the buildSql method to construct our table creation SQL.
     public static final String SQL_CREATE = buildSql(
             CREATE, TABLE, WITH_COLUMNS,
             ID, INTEGER, PRIMARY_KEY, AUTO_INCREMENT, NEXT_COLUMN,
@@ -60,11 +61,20 @@ public class SecretKeyDatabase extends AbstractDatabase {
         cv.put(BYTES_REMAINING, keyData.length);
         long rid = db.insert(TABLE, null, cv);
 
-        db.close();
+        if( CLOSE_DB_WHEN_COMPLETE ) {
+            db.close();
+        }
 
         return rid;
     }
 
+    /**
+     * Insert a new key into the database.
+     *
+     * @param id
+     * @param includeKey
+     * @return
+     */
     public SecretKey fetch(long id, boolean includeKey) {
         DBHelper dbHelper = new DBHelper(_context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -72,11 +82,11 @@ public class SecretKeyDatabase extends AbstractDatabase {
         Cursor cursor = db.query(
                 TABLE,
                 includeKey ? ALL_COLUMNS : ALL_COLUMNS_BUT_KEY,
-                ID + " = ?",
+                ID_EQUALS_PARAM,
                 new String[]{String.valueOf(id)},
                 null,
                 null,
-                ID + " ASC");
+                ID_ASCENDING);
 
         SecretKey result = null;
         if (cursor != null) {
@@ -87,11 +97,19 @@ public class SecretKeyDatabase extends AbstractDatabase {
             cursor.close();
         }
 
-        db.close();
+        if( CLOSE_DB_WHEN_COMPLETE ) {
+            db.close();
+        }
 
         return result;
     }
 
+    /**
+     * List the secret keys in the database.
+     *
+     * @param includeKey
+     * @return
+     */
     public List<SecretKey> list(boolean includeKey) {
         DBHelper dbHelper = new DBHelper(_context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -103,7 +121,7 @@ public class SecretKeyDatabase extends AbstractDatabase {
                 null,
                 null,
                 null,
-                ID + " ASC");
+                ID_ASCENDING);
 
         List<SecretKey> result = new ArrayList<>();
         if (cursor != null) {
@@ -113,30 +131,55 @@ public class SecretKeyDatabase extends AbstractDatabase {
             cursor.close();
         }
 
-        db.close();
+        if( CLOSE_DB_WHEN_COMPLETE ) {
+            db.close();
+        }
 
         return result;
     }
 
-    public void delete(Integer id) {
+    /**
+     * Delete the secret key with the given id from the database.
+     * @param id
+     */
+    public void delete(Long id) {
         DBHelper dbHelper = new DBHelper(_context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete(TABLE, ID + " = ?", new String[]{String.valueOf(id)});
-        db.close();
+        db.delete(TABLE, ID_EQUALS_PARAM, new String[]{String.valueOf(id)});
+
+        if( CLOSE_DB_WHEN_COMPLETE ) {
+            db.close();
+        }
     }
 
-    public void updateKey(Integer id, byte[] newKey) {
+    /**
+     * Update the secret key with new data.
+     *
+     * @param id
+     * @param newKey
+     */
+    public void updateKey(Long id, byte[] newKey, int bytesRemaining) {
         DBHelper dbHelper = new DBHelper(_context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(KEY, newKey);
-        cv.put(BYTES_REMAINING, newKey.length);
-        db.update(TABLE, cv, ID + " = ?", new String[]{String.valueOf(id)});
-        db.close();
+        cv.put(BYTES_REMAINING, bytesRemaining);
+        db.update(TABLE, cv, ID_EQUALS_PARAM, new String[]{String.valueOf(id)});
+
+        if( CLOSE_DB_WHEN_COMPLETE ) {
+            db.close();
+        }
     }
 
+    /**
+     * Build a secret key object from the cursor.
+     *
+     * @param cursor
+     * @param includeKey
+     * @return
+     */
     private SecretKey entityFromCursor(Cursor cursor, boolean includeKey) {
-        int id = cursor.getInt(cursor.getColumnIndex(ID));
+        long id = cursor.getLong(cursor.getColumnIndex(ID));
         String name = cursor.getString(cursor.getColumnIndex(NAME));
         int colour = cursor.getInt(cursor.getColumnIndex(COLOUR));
         String description = cursor.getString(cursor.getColumnIndex(DESCRIPTION));

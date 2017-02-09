@@ -2,17 +2,21 @@ package com.aptasystems.vernamcipher;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
 import com.aptasystems.vernamcipher.database.SecretKeyDatabase;
 import com.aptasystems.vernamcipher.model.SecretKey;
 import com.aptasystems.vernamcipher.util.FileManager;
+import com.aptasystems.vernamcipher.util.ShareUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,51 +24,24 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SecretKeyListChoiceListener implements AbsListView.MultiChoiceModeListener {
+public abstract class SecretKeyListChoiceListener implements AbsListView.MultiChoiceModeListener {
 
+    private CoordinatorLayout _coordinatorLayout;
     private ListView _listView;
 
-    public SecretKeyListChoiceListener(ListView listView) {
+    public SecretKeyListChoiceListener(CoordinatorLayout coordinatorLayout, ListView listView) {
+        _coordinatorLayout = coordinatorLayout;
         _listView = listView;
     }
 
     @Override
     public void onItemCheckedStateChanged(ActionMode mode, int position,
                                           long id, boolean checked) {
-        // Here you can do something when items are selected/de-selected,
-        // such as update the title in the CAB
-        // TODO - Hardcoded text.
-        mode.setTitle("" + _listView.getCheckedItemCount() + " selected");
-
-    }
-
-    private Intent buildShareIntent(List<File> files) {
-
-        // Set up our share intent with the currently selected files.
-        Intent shareIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-
-        ArrayList<Uri> uris = new ArrayList<Uri>();
-        for (File file : files) {
-            Uri uri = Uri.fromFile(file);
-            uris.add(uri);
-        }
-        shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        // TODO - Hardcoded text.
-        shareIntent.setType("application/octet-stream");
-        return shareIntent;
-    }
-
-    private void copy(File src, File dst) throws IOException {
-        FileInputStream inStream = new FileInputStream(src);
-        FileOutputStream outStream = new FileOutputStream(dst);
-        FileChannel inChannel = inStream.getChannel();
-        FileChannel outChannel = outStream.getChannel();
-        inChannel.transferTo(0, inChannel.size(), outChannel);
-        inStream.close();
-        outStream.close();
+        updateTitleText(mode);
     }
 
     @Override
@@ -79,43 +56,40 @@ public class SecretKeyListChoiceListener implements AbsListView.MultiChoiceModeL
                 return true;
             case R.id.action_share: {
 
-                // Build a list of selected items.
-                List<SecretKey> selectedItems = new ArrayList<>();
-                int len = _listView.getCount();
-                SparseBooleanArray checkedArray = _listView.getCheckedItemPositions();
-                for (int ii = 0; ii < len; ii++) {
-                    if (checkedArray.get(ii)) {
-                        SecretKey selectedItem = (SecretKey) _listView.getItemAtPosition(ii);
-                        selectedItems.add(selectedItem);
+                // We need to ensure that external storage is available and writable before we continue.
+                FileManager.StorageState storageState = FileManager.getInstance(_listView.getContext()).getExternalStorageState();
+                if (storageState == FileManager.StorageState.READ_ONLY) {
+                    Snackbar.make(_coordinatorLayout, R.string.toast_external_storage_read_only_share_secret_key, Snackbar.LENGTH_LONG).show();
+                } else if (storageState == FileManager.StorageState.NOT_AVAILABLE) {
+                    Snackbar.make(_coordinatorLayout, R.string.toast_external_storage_not_available_share_secret_key, Snackbar.LENGTH_LONG).show();
+                } else {
+
+                    // Build a list of selected items.
+                    List<SecretKey> selectedItems = new ArrayList<>();
+                    int len = _listView.getCount();
+                    SparseBooleanArray checkedArray = _listView.getCheckedItemPositions();
+                    for (int ii = 0; ii < len; ii++) {
+                        if (checkedArray.get(ii)) {
+                            SecretKey selectedItem = (SecretKey) _listView.getItemAtPosition(ii);
+                            selectedItems.add(selectedItem);
+                        }
                     }
-                }
 
-                // Build a list of files.
-                List<File> files = new ArrayList<>();
-                for (SecretKey selectedItem : selectedItems) {
-
-                    // Get the secret key with the key data.
-                    SecretKey secretKey = SecretKeyDatabase.getInstance(_listView.getContext()).fetch(selectedItem.getId(), true);
-
-                    File file = FileManager.getInstance(_listView.getContext()).newTempFile(secretKey.getName());
+                    // Build a list of files.
+                    List<File> files = null;
                     try {
-                        FileOutputStream outStream = new FileOutputStream(file);
-                        outStream.write(secretKey.getKey());
-                        outStream.close();
-                    } catch (FileNotFoundException e) {
-                        // TODO
-                        e.printStackTrace();
+                        files = buildShareFileList(selectedItems);
                     } catch (IOException e) {
-                        // TODO
-                        e.printStackTrace();
+                        Snackbar.make(_coordinatorLayout,
+                                R.string.error_exception_build_share_list,
+                                Snackbar.LENGTH_LONG).show();
+                        return true;
                     }
-                    files.add(file);
-                }
 
-                // TODO - We need to clean up our files. Perhaps we can start the share activity for result, and on result, delete the files we created...?
-                Intent shareIntent = buildShareIntent(files);
-                _listView.getContext().startActivity(shareIntent);
-                mode.finish();
+                    startShareActivity(files);
+                    mode.finish();
+
+                }
                 return true;
             }
             case R.id.action_delete: {
@@ -136,34 +110,43 @@ public class SecretKeyListChoiceListener implements AbsListView.MultiChoiceModeL
         }
     }
 
+    protected List<File> buildShareFileList(List<SecretKey> selectedItems) throws IOException {
+        List<File> files = new ArrayList<>();
+        for (SecretKey selectedItem : selectedItems) {
+
+            // Get the secret key with the key data.
+            SecretKey secretKey = SecretKeyDatabase.getInstance(_listView.getContext()).fetch(selectedItem.getId(), true);
+
+            File file = FileManager.getInstance(_listView.getContext()).newTempFile(secretKey.getId() + ";" + secretKey.getName());
+            FileOutputStream outStream = new FileOutputStream(file);
+            outStream.write(secretKey.getKey());
+            outStream.close();
+            files.add(file);
+        }
+        return files;
+    }
+
     @Override
-//    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public boolean onCreateActionMode(ActionMode mode, Menu
             menu) {
         // Inflate the menu for the CAB
-//        MenuInflater inflater = getActivity().getMenuInflater();
         MenuInflater inflater = mode.getMenuInflater();
         inflater.inflate(R.menu.menu_selected_secret_keys, menu);
 
-        mode.setTitle("" + _listView.getCheckedItemCount() + " selected");
-
-        //onCreateActionMode
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            mStartColor = getActivity().getWindow().getStatusBarColor();
-//            getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
-//        }
+        updateTitleText(mode);
 
         return true;
     }
 
+    private void updateTitleText(ActionMode mode) {
+        String titleText = String.format(_listView.getContext().getString(R.string.secret_keys_selected),
+                _listView.getCheckedItemCount());
+        mode.setTitle(titleText);
+    }
+
     @Override
     public void onDestroyActionMode(ActionMode mode) {
-        // Here you can make any necessary updates to the activity when
-        // the CAB is removed. By default, selected items are deselected/unchecked.
-        //onDestroyActionMode
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            getActivity().getWindow().setStatusBarColor(mStartColor);
-//        }
+        // Noop.
     }
 
     @Override
@@ -172,4 +155,6 @@ public class SecretKeyListChoiceListener implements AbsListView.MultiChoiceModeL
         // an invalidate() request
         return false;
     }
+
+    protected abstract void startShareActivity(List<File> files);
 }

@@ -24,34 +24,53 @@ public class MessageDatabase extends AbstractDatabase {
         return _instance;
     }
 
+    // Define our table name and columns.
     private static final String TABLE = "message";
-    private static final String ID = "_id";
+    private static final String INCOMING = "incoming";
     private static final String CONTENT = "content";
 
-    private static final String[] ALL_COLUMNS = new String[]{ID, CONTENT};
+    private static final String[] ALL_COLUMNS = new String[]{ID, INCOMING, CONTENT};
 
+    // Uses the buildSql method to construct our table creation SQL.
     public static final String SQL_CREATE = buildSql(
             CREATE, TABLE, WITH_COLUMNS,
             ID, INTEGER, PRIMARY_KEY, AUTO_INCREMENT, NEXT_COLUMN,
+            INCOMING, INTEGER, NOT_NULL, NEXT_COLUMN,
             CONTENT, TEXT, NOT_NULL, DONE_COLUMNS);
 
     private MessageDatabase(Context context) {
         _context = context;
     }
 
-    public long insert(String content) {
+    /**
+     * Insert a new message into the database.
+     *
+     * @param incoming
+     * @param content
+     * @return
+     */
+    public long insert(boolean incoming, String content) {
         DBHelper dbHelper = new DBHelper(_context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         ContentValues cv = new ContentValues();
+        cv.put(INCOMING, incoming ? TRUE : FALSE );
         cv.put(CONTENT, content);
         long rid = db.insert(TABLE, null, cv);
 
-        db.close();
+        if( CLOSE_DB_WHEN_COMPLETE ) {
+            db.close();
+        }
 
         return rid;
     }
 
+    /**
+     * Fetch the message with the given id from the database.
+     *
+     * @param id
+     * @return
+     */
     public Message fetch(long id) {
         DBHelper dbHelper = new DBHelper(_context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -59,11 +78,11 @@ public class MessageDatabase extends AbstractDatabase {
         Cursor cursor = db.query(
                 TABLE,
                 ALL_COLUMNS,
-                ID + " = ?",
+                ID_EQUALS_PARAM,
                 new String[]{String.valueOf(id)},
                 null,
                 null,
-                ID + " ASC");
+                ID_ASCENDING);
 
         Message result = null;
         if (cursor != null) {
@@ -74,11 +93,18 @@ public class MessageDatabase extends AbstractDatabase {
             cursor.close();
         }
 
-        db.close();
+        if( CLOSE_DB_WHEN_COMPLETE ) {
+            db.close();
+        }
 
         return result;
     }
 
+    /**
+     * List all messages in the database.
+     *
+     * @return
+     */
     public List<Message> list() {
         DBHelper dbHelper = new DBHelper(_context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -90,7 +116,7 @@ public class MessageDatabase extends AbstractDatabase {
                 null,
                 null,
                 null,
-                ID + " ASC");
+                ID_ASCENDING);
 
         List<Message> result = new ArrayList<>();
         if (cursor != null) {
@@ -100,22 +126,38 @@ public class MessageDatabase extends AbstractDatabase {
             cursor.close();
         }
 
-        db.close();
+        if( CLOSE_DB_WHEN_COMPLETE ) {
+            db.close();
+        }
 
         return result;
     }
 
-    public void delete(Integer id) {
+    /**
+     * Delete the message with the given id from the database.
+     *
+     * @param id
+     */
+    public void delete(Long id) {
         DBHelper dbHelper = new DBHelper(_context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete(TABLE, ID + " = ?", new String[]{String.valueOf(id)});
-        db.close();
+        db.delete(TABLE, ID_EQUALS_PARAM, new String[]{String.valueOf(id)});
+        if( CLOSE_DB_WHEN_COMPLETE ) {
+            db.close();
+        }
     }
 
+    /**
+     * Construct a message from the cursor.
+     *
+     * @param cursor
+     * @return
+     */
     private Message entityFromCursor(Cursor cursor) {
-        int id = cursor.getInt(cursor.getColumnIndex(ID));
+        long id = cursor.getLong(cursor.getColumnIndex(ID));
+        int incoming = cursor.getInt(cursor.getColumnIndex(INCOMING));
         String content = cursor.getString(cursor.getColumnIndex(CONTENT));
-        Message result = new Message(id, content);
+        Message result = new Message(id, incoming == TRUE, content);
         return result;
     }
 
