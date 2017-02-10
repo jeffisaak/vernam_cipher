@@ -23,6 +23,9 @@
     <string name="key_length_content_2">Key length: %1$d average length email(s) (%2$s %3$s).</string>
     <string name="key_length_bytes">byte(s)</string>
     <string name="key_length_kilobytes">kb</string>
+    <string name="key_data_source">Key data source</string>
+    <string name="key_data_source_android">Android pseudo-random number generator</string>
+    <string name="key_data_source_random_org">Random.org atmospheric noise</string>
     <string name="password_title">Password</string>
     <string name="password_content_1">You may protect the key with a password; if you do not use a password, anyone with physical access to your device may be able to retrieve, modify, and send messages using your secret keys.</string>
     <string name="password_content_2">This password must be entered every time you want to use the key to encrypt or decrypt a message.</string>
