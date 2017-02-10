@@ -27,6 +27,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -40,6 +41,8 @@ import org.spongycastle.crypto.CryptoException;
 
 import java.security.SecureRandom;
 import java.text.NumberFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.crypto.SecretKey;
@@ -673,7 +676,15 @@ public class AddSecretKeyActivity extends AppCompatActivity {
                                     _success = false;
                                     _errorMessage = new String(error.networkResponse.data);
                                 }
-                            });
+                            }) {
+                                @Override
+                                public Map<String, String> getHeaders() throws AuthFailureError {
+                                    // random.org has been responding with 503s if there is no user agent set here.
+                                    Map<String, String> headers = new HashMap<>();
+                                    headers.put("User-Agent", "volley/0");
+                                    return headers;
+                                }
+                            };
                             queue.add(stringRequest);
                         }
                     }
