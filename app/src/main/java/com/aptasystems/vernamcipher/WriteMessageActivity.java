@@ -3,6 +3,7 @@ package com.aptasystems.vernamcipher;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -11,14 +12,18 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.aptasystems.vernamcipher.database.MessageDatabase;
 import com.aptasystems.vernamcipher.database.SecretKeyDatabase;
 import com.aptasystems.vernamcipher.model.SecretKey;
@@ -47,6 +52,8 @@ public class WriteMessageActivity extends AppCompatActivity {
 
     private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
+    private static final int SHARE_REQUEST_CODE = 100;
+
     private CoordinatorLayout _coordinatorLayout;
     private TextView _nameTextView;
     private TextView _secretKeyDescriptionTextView;
@@ -58,9 +65,6 @@ public class WriteMessageActivity extends AppCompatActivity {
     private int _secretKeyLength;
     private int originalBytesRemainingColor;
 
-    private int _currentRequestCode;
-    private Map<Integer, List<File>> _fileMap;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,9 +72,6 @@ public class WriteMessageActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        _currentRequestCode = 1;
-        _fileMap = new HashMap<>();
 
         SecretKey secretKey = (SecretKey) getIntent().getSerializableExtra(EXTRA_KEY_SECRET_KEY);
 
@@ -82,9 +83,11 @@ public class WriteMessageActivity extends AppCompatActivity {
         _contentEditText = (EditText) findViewById(R.id.message_edit_text);
         _saveCopyCheckBox = (CheckBox) findViewById(R.id.check_box_save_message_copy);
 
+        // Populate the key name.
         _nameTextView.setText(secretKey.getName());
         _nameTextView.setTextColor(secretKey.getColour());
 
+        // Populate the key description
         if (TextUtils.getTrimmedLength(secretKey.getDescription()) > 0) {
             _secretKeyDescriptionTextView.setVisibility(View.VISIBLE);
             _secretKeyDescriptionTextView.setText(secretKey.getDescription());
@@ -132,7 +135,6 @@ public class WriteMessageActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 
     @Override
@@ -179,8 +181,7 @@ public class WriteMessageActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void sendMessage(MenuItem menuItem) {
-
+    public void sendMessageAsFile(MenuItem menuItem) {
         // We need to ensure that external storage is available and writable before we continue.
         FileManager.StorageState storageState = FileManager.getInstance(this).getExternalStorageState();
         if (storageState == FileManager.StorageState.READ_ONLY) {
@@ -191,7 +192,15 @@ public class WriteMessageActivity extends AppCompatActivity {
             return;
         }
 
-        // First ensure that there was content entered.
+        sendMessage(SendMethod.FILE);
+    }
+
+    public void sendMessageAsText(MenuItem menuItem) {
+        sendMessage(SendMethod.TEXT);
+    }
+
+    private void sendMessage(final SendMethod method) {
+
         String message = _contentEditText.getText().toString();
         if (message.length() == 0) {
             Snackbar.make(_coordinatorLayout, R.string.empty_message, Snackbar.LENGTH_SHORT).show();
@@ -208,11 +217,6 @@ public class WriteMessageActivity extends AppCompatActivity {
         if (bytesRemaining < 0) {
             // TODO - Add an action?
             Snackbar.make(_coordinatorLayout, R.string.message_too_long, Snackbar.LENGTH_SHORT)
-//                    .setAction(R.string.snackbar_explain_button, new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View v) {
-//                        }
-//                    })
                     .show();
             return;
         }
@@ -252,7 +256,7 @@ public class WriteMessageActivity extends AppCompatActivity {
         DialogUtil.showWarningDialog(this, R.string.send_message_warning_title, R.string.send_message_warning_text, "sendMessageWarning", new DialogUtil.WarningDialogCallback() {
             @Override
             public void onProceed() {
-                sendMessage(secretKey, finalKey, finalClearText);
+                sendMessage(method, secretKey, finalKey, finalClearText);
             }
 
             @Override
@@ -262,27 +266,29 @@ public class WriteMessageActivity extends AppCompatActivity {
         });
     }
 
-    private void sendMessage(SecretKey secretKey, byte[] key, byte[] clearText) {
+    private void sendMessage(SendMethod method, SecretKey secretKey, byte[] key, byte[] clearText) {
 
         // Encrypt the message.
         byte[] cipherText = Crypto.vernamCipher(key, clearText);
 
-        // Write the cipher text to disk
-        File messageFile = FileManager.getInstance(this).newTempFile();
-        try {
-            FileOutputStream fos = new FileOutputStream(messageFile);
-            fos.write(cipherText);
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        // If we're sending as a file, write the cipher text to a file and hang on to the filename.
+        File messageFile = null;
+        if( method == SendMethod.FILE ) {
+
+            // Write the cipher text to disk
+            messageFile = FileManager.getInstance(this).newTempFile();
+            try {
+                FileOutputStream fos = new FileOutputStream(messageFile);
+                fos.write(cipherText);
+                fos.close();
+            } catch (IOException e) {
+                // TODO - Handle exception appropriately.
+                e.printStackTrace();
+            }
         }
 
-        // Put the file in the file map so we can delete it afterwards.
-        List<File> files = new ArrayList<>();
-        files.add(messageFile);
-        _fileMap.put(_currentRequestCode, files);
-
         // Cut off the part of the key that we used and update the secret key.
+
         byte[] newKey = new byte[key.length - clearText.length];
         for (int ii = clearText.length; ii < key.length; ii++) {
             newKey[ii - clearText.length] = key[ii];
@@ -312,22 +318,23 @@ public class WriteMessageActivity extends AppCompatActivity {
         }
 
         // Share.
-        Intent shareIntent = ShareUtil.buildShareIntent(this, messageFile);
-        startActivityForResult(shareIntent, _currentRequestCode++);
+        if( method == SendMethod.FILE ) {
+            Intent shareIntent = ShareUtil.buildShareIntent(this, messageFile);
+            Intent chooserIntent = Intent.createChooser(shareIntent, "Send message as file");
+            startActivityForResult(shareIntent, SHARE_REQUEST_CODE);
+        } else if( method == SendMethod.TEXT)
+        {
+            // Base64 encode the cipher text.
+            String cipherString = Base64.encodeToString(cipherText, Base64.DEFAULT);
+            Intent shareIntent = ShareUtil.buildShareIntent(cipherString);
+            Intent chooserIntent = Intent.createChooser(shareIntent, "Send message as text");
+            startActivityForResult(chooserIntent, SHARE_REQUEST_CODE);
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        // Delete the files that were shared.
-        if (_fileMap.containsKey(requestCode)) {
-            List<File> files = _fileMap.remove(requestCode);
-            for (File file : files) {
-                if (file.exists()) {
-                    file.delete();
-                }
-            }
-        }
+        // After we've come back from the share activity, finish this one.
         finish();
     }
 

@@ -82,7 +82,38 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="When you are finished writing your message, tap the send button at the top of the screen, then select how you would like to transmit the encrypted message. When you reach the point of selecting how to send the message, the part of the key used to encrypt the message has been consumed."
+            android:text="When you are finished writing your message, tap the send button at the top of the screen, then select how you would like to transmit the encrypted message. When you reach the point of selecting which app to use to send the message, the part of the key used to encrypt the message has been consumed."
+            android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:layout_marginTop="8dp"
+            android:text="You may send messages using the sharing capabilities of your device. You may send the encrypted message either as a file or as text. Different sharing options will be available to you depending on which sending method you use and which apps you have installed on your device."
+            android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Sending messages as files or text"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:layout_marginTop="8dp"
+            android:text="Messages sent as files may be shared using applications that allow you to send files to people, such as email applications. When the recipient receives the file (in their email, for example), they may open the attachment using the \'Decrypt with Vernam Cipher\' application to decrypt the message."
+            android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:layout_marginTop="8dp"
+            android:text="Messages sent as text may be shared using applications that allow you to save or send text, such as messaging applications. When your recipient receives the text, they may decrypt the message by selecting it and sharing it with the \'Decrypt with Vernam Cipher\' application (if using Android Marshmallow or later), or by copying the text and selecting the \'Decrypt clipboard\' button within the Vernam Cipher app."
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView

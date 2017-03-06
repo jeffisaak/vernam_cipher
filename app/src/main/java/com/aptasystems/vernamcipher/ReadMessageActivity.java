@@ -76,7 +76,8 @@ public class ReadMessageActivity extends AppCompatActivity {
 
     public void shareMessage(MenuItem menuItem) {
         Intent shareIntent = ShareUtil.buildShareIntent( _contentView.getText().toString());
-        startActivity(shareIntent);
+        Intent chooserIntent = Intent.createChooser(shareIntent, "Share decrypted message");
+        startActivity(chooserIntent);
     }
 
     public void showHelpActivity(MenuItem menuItem) {

@@ -30,18 +30,6 @@
 
     <include layout="@layout/content_main"/>
 
-    <!--<com.getbase.floatingactionbutton.FloatingActionButton-->
-    <!--android:id="@+id/fab"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_alignParentBottom="true"-->
-    <!--android:layout_gravity="bottom|end"-->
-    <!--android:layout_margin="@dimen/fab_margin"-->
-    <!--android:onClick="addSecretKey"-->
-    <!--app:fab_colorNormal="@color/colorAccent"-->
-    <!--app:fab_colorPressed="@color/colorAccentDark"-->
-    <!--app:fab_icon="@drawable/ic_add_white"/>-->
-
     <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/floating_menu"
         android:layout_width="wrap_content"
@@ -74,6 +62,16 @@
             app:fab_colorPressed="@color/colorAccentDark"
             app:fab_icon="@drawable/ic_message_white_24dp"
             app:fab_title="New message"/>
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="decryptClipboard"
+            app:fabSize="normal"
+            app:fab_colorNormal="@color/colorAccent"
+            app:fab_colorPressed="@color/colorAccentDark"
+            app:fab_icon="@drawable/ic_lock_open_white_24dp"
+            app:fab_title="Decrypt clipboard"/>
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
 </android.support.design.widget.CoordinatorLayout>

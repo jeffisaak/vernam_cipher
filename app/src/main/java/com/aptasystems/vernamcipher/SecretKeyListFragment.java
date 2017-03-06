@@ -24,9 +24,6 @@ import java.util.Map;
 
 public class SecretKeyListFragment extends Fragment {
 
-    private int _currentRequestCode;
-    private Map<Integer, List<File>> _fileMap;
-
     private ListView _listView;
     private SecretKeyListAdapter _listAdapter;
     private TextView _noSecretKeys;
@@ -51,8 +48,6 @@ public class SecretKeyListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        _currentRequestCode = 1;
-        _fileMap = new HashMap<>();
     }
 
     @Override
@@ -72,12 +67,9 @@ public class SecretKeyListFragment extends Fragment {
             @Override
             protected void startShareActivity(List<File> files) {
 
-                // Put the list of files in the file map so we can delete them.
-                _fileMap.put(_currentRequestCode, files);
-
-                // Start the activity for result.
                 Intent shareIntent = ShareUtil.buildShareIntent(getActivity(), files);
-                startActivityForResult(shareIntent, _currentRequestCode++);
+                Intent chooserIntent = Intent.createChooser(shareIntent, "Share secret key");
+                startActivity(chooserIntent);
             }
         };
         _listView.setMultiChoiceModeListener(choiceListener);
@@ -104,20 +96,5 @@ public class SecretKeyListFragment extends Fragment {
         _listAdapter.refresh();
 
         super.onResume();
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        if (!_fileMap.containsKey(requestCode)) {
-            return;
-        }
-
-        // Delete the files that were shared.
-        List<File> files = _fileMap.remove(requestCode);
-        for (File file : files) {
-            if (file.exists()) {
-                file.delete();
-            }
-        }
     }
 }

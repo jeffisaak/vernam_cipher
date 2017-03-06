@@ -7,6 +7,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -21,6 +22,10 @@
     <style name="floating_action_bar_label">
         <item name="android:background">@drawable/fab_label_background</item>
         <item name="android:textColor">@color/black_semi_transparent</item>
+    </style>
+
+    <style name="OverflowMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <item name="overlapAnchor">false</item>
     </style>
 
 </resources>

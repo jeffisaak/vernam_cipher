@@ -145,6 +145,14 @@
             android:text="When you receive an encrypted message (via an email attachment, for example), you may open the encrypted message with the \'Decrypt with Vernam Cipher\' app. This will allow you to read and optionally save the message."
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:layout_marginTop="8dp"
+            android:text="You may also receive encrypted messages as text. To decrypt messages received as text, first select the text in whichever app you received it. If you are running Android Marshmallow or later, you may then tap the \'Share\' button that appears. If not, copy the text by tapping the \'Copy\' button, then open the Vernam Cipher app, tap the \'Add\' button on the bottom right, and tap the \'Decrypt clipboard\' button."
+            android:textAppearance="?android:attr/textAppearanceSmall"/>
+
     </LinearLayout>
 
 </ScrollView>

@@ -26,7 +26,6 @@ public class ShareUtil {
     }
 
     public static Intent buildShareIntent(Context context, File file) {
-
         List<File> files = new ArrayList<>();
         files.add(file);
 
@@ -39,8 +38,6 @@ public class ShareUtil {
 
         ArrayList<Uri> uris = new ArrayList<Uri>();
         for (File file : files) {
-            // Target SDK 24 doesn't like this any more.
-            //Uri uri = Uri.fromFile(file);
             Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
             uris.add(uri);
         }

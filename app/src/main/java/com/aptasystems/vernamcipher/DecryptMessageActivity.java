@@ -7,6 +7,8 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -83,34 +85,48 @@ public class DecryptMessageActivity extends AppCompatActivity {
 
         String action = getIntent().getAction();
 
-        // This list is populated differently depending on the intent action.
+        // Depending on how the share happened, we may either have a single URI, a list of URIs,
+        // or some text.  Either the URIs list will contain at least one URI or the text will
+        // contain base64-encoded cipher text.
         List<Uri> uris = new ArrayList<>();
+        String base64CipherText = null;
 
         switch (action) {
             case Intent.ACTION_VIEW:
             case Intent.ACTION_EDIT:
+                // Single stream.
                 uris.add(getIntent().getData());
                 break;
             case Intent.ACTION_SEND:
-                // Only streams.
-                uris.add(getIntent().<Uri>getParcelableExtra(Intent.EXTRA_STREAM));
+
+                // Check to see if text was shared.
+                base64CipherText = getIntent().getStringExtra(Intent.EXTRA_TEXT);
+
+                // If there was no text, we have a stream.
+                if (base64CipherText == null) {
+                    uris.add(getIntent().<Uri>getParcelableExtra(Intent.EXTRA_STREAM));
+                }
+
                 break;
             case Intent.ACTION_SEND_MULTIPLE:
-                // Only streams.
+                // Multiple streams.
                 uris = getIntent().getParcelableArrayListExtra(Intent.EXTRA_STREAM);
                 break;
         }
 
+        // If the list of URIs is empty, this does nothing.
         for (Uri uri : uris) {
             decryptMessage(uri);
         }
+
+        // If we have base64 encoded cipher text, decode and decrypt.
+        if (base64CipherText != null) {
+            byte[] cipherText = Base64.decode(base64CipherText, Base64.DEFAULT);
+            decryptMessage(cipherText);
+        }
     }
 
-    private void decryptMessage(Uri uri)
-    {
-        // Fetch the secret key.
-        SecretKey selectedSecretKey = (SecretKey) _keySpinner.getSelectedItem();
-        final SecretKey secretKey = SecretKeyDatabase.getInstance(this).fetch(selectedSecretKey.getId(), true);
+    private byte[] decryptKeyIfNecessary(final SecretKey secretKey) {
 
         // Attempt to decrypt the key if a password is provided.  If that fails, we can't go further.
         byte[] decryptedKey = null;
@@ -119,6 +135,7 @@ public class DecryptMessageActivity extends AppCompatActivity {
             try {
                 String salt = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
                 decryptedKey = Crypto.decryptToByteArray(password, salt, secretKey.getKey());
+                return decryptedKey;
             } catch (CryptoException e) {
 
                 // Decryption failed.  Show a snackbar and put a validation error in the field.
@@ -127,21 +144,57 @@ public class DecryptMessageActivity extends AppCompatActivity {
                 snackbar.show();
 
                 _keyPasswordEditText.setError(getString(R.string.incorrect_password));
-                return;
+                return null;
             }
+        } else {
+            return secretKey.getKey();
+        }
+    }
+
+    private void decryptMessage(byte[] cipherText) {
+
+        SecretKey selectedSecretKey = (SecretKey) _keySpinner.getSelectedItem();
+        final SecretKey secretKey = SecretKeyDatabase.getInstance(this).fetch(selectedSecretKey.getId(), true);
+
+        // Decrypt the key if necessary.
+        byte[] key = decryptKeyIfNecessary(secretKey);
+        if (key == null) {
+            return;
         }
 
-        // If we got here, either the decryption of the key worked fine or there was no password provided (and, thus, no decrypt attempt).
-        byte[] key = null;
-        if (decryptedKey != null) {
-            key = decryptedKey;
-        } else {
-            key = secretKey.getKey();
+        // Show a warning dialog.  Maybe.
+        final byte[] finalKey = key;
+        final byte[] finalCipherText = cipherText;
+        DialogUtil.showWarningDialog(this,
+                R.string.decrypt_message_warning_title,
+                R.string.decrypt_message_warning_text,
+                DECRYPT_MESSAGE_WARNING,
+                new DialogUtil.WarningDialogCallback() {
+                    @Override
+                    public void onProceed() {
+                        decryptMessage(secretKey, finalKey, finalCipherText);
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        // Noop.
+                    }
+                });
+    }
+
+    private void decryptMessage(Uri uri) {
+
+        SecretKey selectedSecretKey = (SecretKey) _keySpinner.getSelectedItem();
+        final SecretKey secretKey = SecretKeyDatabase.getInstance(this).fetch(selectedSecretKey.getId(), true);
+
+        // Decrypt the key if necessary.
+        byte[] key = decryptKeyIfNecessary(secretKey);
+        if (key == null) {
+            return;
         }
 
         // Get the message content to decrypt.
         byte[] cipherText = null;
-
         try {
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             InputStream inStream = getContentResolver().openInputStream(uri);
@@ -166,16 +219,16 @@ public class DecryptMessageActivity extends AppCompatActivity {
                 R.string.decrypt_message_warning_text,
                 DECRYPT_MESSAGE_WARNING,
                 new DialogUtil.WarningDialogCallback() {
-            @Override
-            public void onProceed() {
-                decryptMessage(secretKey, finalKey, finalCipherText);
-            }
+                    @Override
+                    public void onProceed() {
+                        decryptMessage(secretKey, finalKey, finalCipherText);
+                    }
 
-            @Override
-            public void onCancel() {
-                // Noop.
-            }
-        });
+                    @Override
+                    public void onCancel() {
+                        // Noop.
+                    }
+                });
     }
 
     private void decryptMessage(SecretKey secretKey, byte[] key, byte[] ciphertext) {
@@ -194,7 +247,7 @@ public class DecryptMessageActivity extends AppCompatActivity {
 
         // If there was a password for this key, encrypt the new key before updating it in the database.
         byte[] keyFinal = null;
-        if (_keyPasswordEditText.getText().toString().length() != 0 ) {
+        if (_keyPasswordEditText.getText().toString().length() != 0) {
             String password = _keyPasswordEditText.getText().toString();
             String salt = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
             try {

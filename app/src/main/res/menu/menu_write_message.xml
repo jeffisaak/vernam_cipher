@@ -12,8 +12,26 @@
 
     <item
         android:icon="@drawable/ic_send_white_24dp"
-        android:onClick="sendMessage"
         android:orderInCategory="100"
         android:title="Send"
-        app:showAsAction="always"/>
+        app:showAsAction="always">
+
+        <menu>
+
+            <item
+                android:icon="@drawable/ic_attachment_black_24dp"
+                android:orderInCategory="100"
+                android:onClick="sendMessageAsFile"
+                android:title="Send as file"
+                app:showAsAction="always"/>
+
+            <item
+                android:icon="@drawable/ic_title_black_24dp"
+                android:orderInCategory="100"
+                android:onClick="sendMessageAsText"
+                android:title="Send as text"
+                app:showAsAction="always"/>
+
+        </menu>
+    </item>
 </menu>

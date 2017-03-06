@@ -1,5 +1,7 @@
 package com.aptasystems.vernamcipher;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
@@ -100,6 +102,34 @@ public class MainActivity extends AppCompatActivity {
         _floatingActionsMenu.collapse();
         _viewPager.setCurrentItem(SectionsPagerAdapter.SECRET_KEY_LIST_PAGE);
         Snackbar.make(_coordinatorLayout, R.string.snack_new_message, Snackbar.LENGTH_LONG).show();
+    }
+
+    public void decryptClipboard(View view)
+    {
+        _floatingActionsMenu.collapse();
+
+        // Ensure that there is something on the clipboard that we can decrypt.
+        ClipboardManager clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        ClipData clipData = clipboardManager.getPrimaryClip();
+        String clipText = null;
+        for( int ii=0; ii<clipData.getItemCount(); ii++)
+        {
+            ClipData.Item item = clipData.getItemAt(ii);
+            if( item.getText() != null )
+            {
+                clipText = item.getText().toString();
+                break;
+            }
+        }
+
+        if( clipText == null )
+        {
+            // TODO - Show a snack and return or something.
+        }
+
+        Intent intent = new Intent(Intent.ACTION_SEND, null, this, DecryptMessageActivity.class);
+        intent.putExtra(Intent.EXTRA_TEXT, clipText);
+        startActivity(intent);
     }
 
     /**

@@ -44,6 +44,5 @@
             android:layout_height="wrap_content"
             android:onClick="toggleSaveMessage"
             android:text="Save a copy of this message"/>
-
     </LinearLayout>
 </ScrollView>
