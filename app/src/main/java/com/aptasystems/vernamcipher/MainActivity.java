@@ -70,6 +70,9 @@ public class MainActivity extends AppCompatActivity {
                     .positiveText(android.R.string.ok)
                     .build();
             dialog.show();
+        } else {
+            // Clean up any old files.
+            FileManager.getInstance(this).cleanup();
         }
     }
 
@@ -103,26 +106,22 @@ public class MainActivity extends AppCompatActivity {
         Snackbar.make(_coordinatorLayout, R.string.snack_new_message, Snackbar.LENGTH_LONG).show();
     }
 
-    public void decryptClipboard(View view)
-    {
+    public void decryptClipboard(View view) {
         _floatingActionsMenu.collapse();
 
         // Ensure that there is something on the clipboard that we can decrypt.
         ClipboardManager clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
         ClipData clipData = clipboardManager.getPrimaryClip();
         String clipText = null;
-        for( int ii=0; ii<clipData.getItemCount(); ii++)
-        {
+        for (int ii = 0; ii < clipData.getItemCount(); ii++) {
             ClipData.Item item = clipData.getItemAt(ii);
-            if( item.getText() != null )
-            {
+            if (item.getText() != null) {
                 clipText = item.getText().toString();
                 break;
             }
         }
 
-        if( clipText == null )
-        {
+        if (clipText == null) {
             Snackbar.make(_coordinatorLayout, R.string.snack_no_clip_text, Snackbar.LENGTH_LONG)
                     .show();
             return;

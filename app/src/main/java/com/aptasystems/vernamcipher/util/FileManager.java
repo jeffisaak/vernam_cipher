@@ -52,13 +52,15 @@ public class FileManager {
     }
 
     /**
-     * Cleans up all the temporary files older than a threshold.
+     * Cleans up all the temporary files.
      */
     public void cleanup() {
         Runnable cleanupRunnable = new Runnable() {
             @Override
             public void run() {
-
+                for (File file : _tempFolder.listFiles()) {
+                    file.delete();
+                }
             }
         };
         new Thread(cleanupRunnable).start();
