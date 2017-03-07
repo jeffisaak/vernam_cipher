@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="What does this app do?"
+            android:text="@string/info_what_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="This app allows you to create and share secret keys, then encrypt and decrypt messages using the Vernam Cipher and deliver them using the sharing capabilities of your device."
+            android:text="@string/info_what_content"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
@@ -67,7 +67,7 @@
             android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="A word about key consumption"
+            android:text="@string/info_key_consumption_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -75,7 +75,7 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="This implementation of the Vernam cipher consumes part of the key when it is used. This means that once you encrypt or decrypt something with a key, the part of the key that is used is discarded. If this is not done and multiple encrypted messages are captured by an adversary, it may be possible for them to (partially) decrypt the messages. If, however, key data is only used once and discarded after use, decrypting messages without the secret key is impossible."
+            android:text="@string/info_key_consumption_content_1"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
@@ -83,7 +83,7 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="This means that you must take special care to ensure that the key(s) that you share with your communication partner(s) are used in sync. It is recommended, then, that you have two secret keys for each communications partner. One key should be used by you to encrypt messages for your recipient, and another key should be used by them to encrypt messages for you (and by you to decrypt messages from them)."
+            android:text="@string/info_key_consumption_content_2"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
@@ -91,7 +91,7 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="This also means that a received message may not be decrypted twice, as the first decryption discards the key data needed to decrypt a second time."
+            android:text="@string/info_key_consumption_content_3"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
@@ -137,7 +137,7 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:paddingTop="8dp"
-            android:text="@string/help_who_content_2"
+            android:text="@string/info_who_content_2"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
     </LinearLayout>

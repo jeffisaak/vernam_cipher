@@ -11,7 +11,6 @@ import android.widget.TextView;
 import com.aptasystems.vernamcipher.database.SecretKeyDatabase;
 import com.aptasystems.vernamcipher.model.SecretKey;
 
-import java.io.File;
 import java.text.NumberFormat;
 import java.util.List;
 

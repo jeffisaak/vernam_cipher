@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
     private CoordinatorLayout _coordinatorLayout;
     private FloatingActionsMenu _floatingActionsMenu;
     private ViewPager _viewPager;
-    private SectionsPagerAdapter _pagerAdapter;
 
     static {
         PRNGFixes.apply();
@@ -49,11 +48,11 @@ public class MainActivity extends AppCompatActivity {
         _floatingActionsMenu = (FloatingActionsMenu) findViewById(R.id.floating_menu);
 
         // Create the adapter that will return fragments.
-        _pagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        SectionsPagerAdapter pagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         _viewPager = (ViewPager) findViewById(R.id.view_pager);
-        _viewPager.setAdapter(_pagerAdapter);
+        _viewPager.setAdapter(pagerAdapter);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(_viewPager);
@@ -124,7 +123,9 @@ public class MainActivity extends AppCompatActivity {
 
         if( clipText == null )
         {
-            // TODO - Show a snack and return or something.
+            Snackbar.make(_coordinatorLayout, R.string.snack_no_clip_text, Snackbar.LENGTH_LONG)
+                    .show();
+            return;
         }
 
         Intent intent = new Intent(Intent.ACTION_SEND, null, this, DecryptMessageActivity.class);

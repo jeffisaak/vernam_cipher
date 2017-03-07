@@ -2,7 +2,6 @@ package com.aptasystems.vernamcipher;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,11 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.aptasystems.vernamcipher.database.MessageDatabase;
-import com.aptasystems.vernamcipher.database.SecretKeyDatabase;
 import com.aptasystems.vernamcipher.model.Message;
-import com.aptasystems.vernamcipher.model.SecretKey;
 
-import java.text.NumberFormat;
 import java.util.List;
 
 public class MessageListAdapter extends ArrayAdapter<Message> {

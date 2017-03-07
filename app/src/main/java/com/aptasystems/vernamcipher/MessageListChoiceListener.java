@@ -1,7 +1,5 @@
 package com.aptasystems.vernamcipher;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -11,19 +9,7 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 
 import com.aptasystems.vernamcipher.database.MessageDatabase;
-import com.aptasystems.vernamcipher.database.SecretKeyDatabase;
 import com.aptasystems.vernamcipher.model.Message;
-import com.aptasystems.vernamcipher.model.SecretKey;
-import com.aptasystems.vernamcipher.util.FileManager;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MessageListChoiceListener implements AbsListView.MultiChoiceModeListener {
 

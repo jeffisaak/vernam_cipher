@@ -188,8 +188,7 @@ public class SecretKeyDatabase extends AbstractDatabase {
         if (includeKey) {
             key = cursor.getBlob(cursor.getColumnIndex(KEY));
         }
-        SecretKey result = new SecretKey(id, name, colour, description, key, bytesRemaining);
-        return result;
+        return new SecretKey(id, name, colour, description, key, bytesRemaining);
     }
 
 }

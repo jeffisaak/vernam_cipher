@@ -2,10 +2,10 @@
     <string name="app_name">Vernam Cipher</string>
 
     <!-- Main activity -->
-    <string name="action_settings">Settings</string>
     <string name="action_info">Info</string>
     <string name="action_help">Help</string>
     <string name="snack_new_message">Tap on a secret key to write a message using that key</string>
+    <string name="snack_no_clip_text">The clipboard does not appear to contain encrypted text</string>
 
     <!-- Secret key fragment/list -->
     <string name="page_title_secret_keys">Secret keys</string>
@@ -80,15 +80,21 @@
     <string name="message_too_long">Message exceeds key length</string>
     <string name="empty_message">The message is empty</string>
     <string name="incorrect_password">Incorrect password</string>
-    <string name="snackbar_explain_button">Explain</string>
+    <string name="compose_message">Compose message</string>
+    <string name="save_a_copy">Save a copy of this message</string>
+    <string name="key_password_if_applicable">Key Password (if applicable)</string>
+    <string name="snack_write_error">Unable to write the ciphertext data file</string>
+    <string name="snack_key_encryption_error">Key encryption failed</string>
 
     <!-- Decrypt Message activity -->
     <string name="title_activity_decrypt_message">Decrypt Message</string>
     <string name="action_decrypt">Decrypt</string>
     <string name="intent_decrypt">Decrypt with Vernam Cipher</string>
 
+    <string name="select_key">Select key</string>
+    <string name="password_if_applicable">Password (if applicable)</string>
+
     <string name="error_reading_cipher_text">An error occurred while reading the encrypted message</string>
-    <string name="error_decoding_ciphertext">Error decoding ciphertext</string>
     <string name="error_secret_key_encryption_failed">Secret key encryption failed</string>
 
     <!-- Read Message activity -->
@@ -109,15 +115,39 @@
     <string name="info_open_source_content_2">Please note that the source code has not been audited by an independent third party. If you or your organisation are interested in performing an audit, please contact me, my email address may be found at the bottom of this page.</string>
     <string name="info_who_title">Who wrote this app?</string>
     <string name="info_who_content_1">My name is Jeff Isaak. My background is software development. I am passionate about online security and privacy, personal finance, and garlic. I want to help people reclaim their privacy through clever software. My email address is jisaak@aptasystems.com.</string>
-    <string name="help_who_content_2">If you use this app and like it, please consider donating: https://www.jeffisaak.ca/donate</string>
+    <string name="info_who_content_2">If you use this app and like it, please consider donating: https://www.jeffisaak.ca/donate</string>
+    <string name="info_what_title">What does this app do?</string>
+    <string name="info_what_content">This app allows you to create and share secret keys, then encrypt and decrypt messages using the Vernam Cipher and deliver them using the sharing capabilities of your device.</string>
+    <string name="info_key_consumption_title">A word about key consumption</string>
+    <string name="info_key_consumption_content_1">This implementation of the Vernam cipher consumes part of the key when it is used. This means that once you encrypt or decrypt something with a key, the part of the key that is used is discarded. If this is not done and multiple encrypted messages are captured by an adversary, it may be possible for them to (partially) decrypt the messages. If, however, key data is only used once and discarded after use, decrypting messages without the secret key is impossible.</string>
+    <string name="info_key_consumption_content_2">This means that you must take special care to ensure that the key(s) that you share with your communication partner(s) are used in sync. It is recommended, then, that you have two secret keys for each communications partner. One key should be used by you to encrypt messages for your recipient, and another key should be used by them to encrypt messages for you (and by you to decrypt messages from them).</string>
+    <string name="info_key_consumption_content_3">This also means that a received message may not be decrypted twice, as the first decryption discards the key data needed to decrypt a second time.</string>
 
     <!-- Help activity -->
     <string name="title_activity_help">Help</string>
 
+    <!-- Help for the main activity -->
+    <string name="help_main_introduction_title">Introduction</string>
+    <string name="help_main_introduction_content_1">This app allows you to create and share secret keys, then encrypt and decrypt messages using the Vernam Cipher and deliver them using the sharing capabilities of your device.</string>
+    <string name="help_main_introduction_content_2">Wherever you see a question mark button in the title bar you may tap on it to get help for the screen you are in.</string>
+    <string name="help_main_secret_keys_title">Secret keys</string>
+    <string name="help_main_secret_keys_content">Secret keys are used to encrypt and decrypt messages. The same key must be used to encrypt and decrypt the message, so before you encrypt and send a message, you must share the key with your intended recipient.</string>
+    <string name="help_main_creating_keys_title">Creating keys</string>
+    <string name="help_main_creating_keys_content">To create a key, tap the add button on the main screen, then tap the \'New secret key\' button. Select the key length, enter or generate an optional password, and give the key an optional colour and description.</string>
+    <string name="help_main_sharing_keys_title">Sharing keys</string>
+    <string name="help_main_sharing_keys_content">Once you have created a key, it will be shown in your list of secret keys. To share it, press and hold on the key in the list until the title bar changes to indicate it is selected. Tap the share button, then tap the mechanism you\'d like to share the key with. Android Beam is an excellent way to share secret keys.</string>
+    <string name="help_main_importing_keys_title">Importing keys</string>
+    <string name="help_main_importing_keys_content"><![CDATA[If someone shares a key with you (via email, for example), you may open the key with the \'Import Vernam Cipher key\' app to import it into your secret key list. You may give it an optional description & colour.]]></string>
+    <string name="help_main_messages_title">Messages</string>
+    <string name="help_main_messages_content">Messages that you have saved are shown in the messages list. You may tap on a message to view it or long-press on it to share or delete it.</string>
+    <string name="help_main_encrypting_title"><![CDATA[Encrypting & sending messages]]></string>
+    <string name="help_main_encrypting_content">Once you have shared your key with someone, you may write them a message. Tap on the secret key to begin writing a message using that key.</string>
+    <string name="help_main_decrypting_title">Decrypting messages</string>
+    <string name="help_main_decrypting_content_1">When you receive an encrypted message (via an email attachment, for example), you may open the encrypted message with the \'Decrypt with Vernam Cipher\' app. This will allow you to read and optionally save the message.</string>
+    <string name="help_main_decrypting_content_2">You may also receive encrypted messages as text. To decrypt messages received as text, first select the text in whichever app you received it. If you are running Android Marshmallow or later, you may then tap the \'Share\' button that appears. If not, copy the text by tapping the \'Copy\' button, then open the Vernam Cipher app, tap the \'Add\' button on the bottom right, and tap the \'Decrypt clipboard\' button.</string>
+
     <!-- Warning dialogs (shared) -->
     <string name="do_not_show_warning">Do not show this warning again</string>
-    <string name="warning_positive">Continue</string>
-    <string name="warning_negative">Cancel</string>
 
     <!-- Warning dialog - Send message -->
     <string name="send_message_warning_title">Key consumption warning</string>
@@ -146,4 +176,43 @@
     <string name="toast_external_storage_read_only_send_message">Unable to send messages; external storage is read only</string>
     <string name="toast_external_storage_not_available_send_message">Unable to send messages; external storage is unavailable</string>
 
+    <string name="help">Help</string>
+
+    <!-- Select messages -->
+    <string name="select_all_messages">Select all</string>
+    <string name="delete_messages">Delete</string>
+
+    <!-- Unsorted -->
+    <string name="save_decrypted_message">Save</string>
+    <string name="share_decrypted_message">Share</string>
+    <string name="select_all_keys">Select all</string>
+    <string name="delete_keys">Delete</string>
+    <string name="share_keys">Share</string>
+    <string name="send_message">Send</string>
+    <string name="send_as_file">Send as file</string>
+    <string name="send_as_text">Send as text</string>
+    <string name="no_messages">You have no messages.</string>
+    <string name="no_secret_keys">You have no secret keys.\nTap the add button below to create one.</string>
+    <string name="help_read_message_read_title">Reading messages</string>
+    <string name="help_read_message_read_content">The decrypted content of the selected message is shown on this screen. If the message you are reading has just been decrypted, you may save the message plaintext; you may also share the message plaintext. If a message is not saved or shared in some way, you will not be able to view the message plaintext again.</string>
+    <string name="help_read_message_saving_title">Saving messages</string>
+    <string name="help_read_message_saving_content">If the save icon is visible in the action bar, the message plaintext may be saved to the device. This allows you to return and read the message again later. Any saved messages will be available to anybody that has access to your device; it is a security risk to save messages.</string>
+    <string name="help_read_message_sharing_title">Sharing messages</string>
+    <string name="help_read_message_sharing_content">Tap the share icon in the action bar to share the message plaintext using the available actions on your device, such as saving the message to the clipboard or sending it to someone via email or instant messaging.</string>
+    <string name="help_write_message_writing_title">Writing messages</string>
+    <string name="help_write_message_writing_content">To write a message, tap in the \'Compose message\' area and begin typing. You will notice that as you type, the number of bytes remaining in the key changes. You may not write a message that is longer than the length of the key.</string>
+    <string name="help_write_message_password_keys_title">Password-protected keys</string>
+    <string name="help_write_message_password_keys_content_1">If the key is protected by a password, enter the password in the \'key password\' field.</string>
+    <string name="help_write_message_password_keys_content_2">IMPORTANT: The app does not attempt to distinguish a password protected key from one that is not password protected, and if you do not enter a password for a key that is password protected, the password protected key will be used without decrypting it. This will break your key.</string>
+    <string name="help_write_message_saving_title">Saving a copy of the message</string>
+    <string name="help_write_message_saving_content">If you want to save the message cleartext to your message list, check the appropriate box before sending the message. Doing so will give you the ability to go back and read your message later at the cost of security.</string>
+    <string name="help_write_message_sending_title">Sending the message</string>
+    <string name="help_write_message_sending_content_1">When you are finished writing your message, tap the send button at the top of the screen, then select how you would like to transmit the encrypted message. When you reach the point of selecting which app to use to send the message, the part of the key used to encrypt the message has been consumed.</string>
+    <string name="help_write_message_sending_content_2">You may send messages using the sharing capabilities of your device. You may send the encrypted message either as a file or as text. Different sharing options will be available to you depending on which sending method you use and which apps you have installed on your device.</string>
+    <string name="help_write_message_sending_method_title">Sending messages as files or text</string>
+    <string name="help_write_message_sending_method_content_1">Messages sent as files may be shared using applications that allow you to send files to people, such as email applications. When the recipient receives the file (in their email, for example), they may open the attachment using the \'Decrypt with Vernam Cipher\' application to decrypt the message.</string>
+    <string name="help_write_message_sending_method_content_2">Messages sent as text may be shared using applications that allow you to save or send text, such as messaging applications. When your recipient receives the text, they may decrypt the message by selecting it and sharing it with the \'Decrypt with Vernam Cipher\' application (if using Android Marshmallow or later), or by copying the text and selecting the \'Decrypt clipboard\' button within the Vernam Cipher app.</string>
+    <string name="help_write_message_key_consumption_title">What is key consumption?</string>
+    <string name="help_write_message_key_consumption_content">This implementation of the Vernam cipher consumes part of the key when it is used. This means that once you encrypt or decrypt something with a key, the part of the key that is used is discarded. If this is not done and multiple encrypted messages are captured by an adversary, it may be possible for them to (partially) decrypt the messages. If, however, key data is only used once, decrypting messages without the secret key is impossible.</string>
+    <string name="show_password">Show password</string>
 </resources>

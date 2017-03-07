@@ -13,7 +13,7 @@
     <item
         android:icon="@drawable/ic_send_white_24dp"
         android:orderInCategory="100"
-        android:title="Send"
+        android:title="@string/send_message"
         app:showAsAction="always">
 
         <menu>
@@ -22,14 +22,14 @@
                 android:icon="@drawable/ic_attachment_black_24dp"
                 android:orderInCategory="100"
                 android:onClick="sendMessageAsFile"
-                android:title="Send as file"
+                android:title="@string/send_as_file"
                 app:showAsAction="always"/>
 
             <item
                 android:icon="@drawable/ic_title_black_24dp"
                 android:orderInCategory="100"
                 android:onClick="sendMessageAsText"
-                android:title="Send as text"
+                android:title="@string/send_as_text"
                 app:showAsAction="always"/>
 
         </menu>

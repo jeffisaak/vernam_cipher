@@ -2,11 +2,8 @@ package com.aptasystems.vernamcipher.util;
 
 import org.spongycastle.crypto.CryptoException;
 import org.spongycastle.util.encoders.Hex;
-import org.spongycastle.util.encoders.HexEncoder;
 
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
@@ -134,8 +131,7 @@ public class Crypto {
 
             IvParameterSpec ivspec = new IvParameterSpec(iv);
             decryptionCipher.init(Cipher.DECRYPT_MODE, secret, ivspec);
-            byte[] cleartext = decryptionCipher.doFinal(data);
-            return cleartext;
+            return decryptionCipher.doFinal(data);
         } catch (Exception e) {
             throw new CryptoException("Decryption error", e);
         }
@@ -153,8 +149,7 @@ public class Crypto {
             PBEKeySpec pbeKeySpec = new PBEKeySpec(password.toCharArray(), Hex.decode(salt), PBE_ITERATION_COUNT, PBE_KEY_LENGTH);
             SecretKeyFactory factory = SecretKeyFactory.getInstance(PBE_ALGORITHM, PROVIDER);
             SecretKey tmp = factory.generateSecret(pbeKeySpec);
-            SecretKey secret = new SecretKeySpec(tmp.getEncoded(), SECRET_KEY_ALGORITHM);
-            return secret;
+            return new SecretKeySpec(tmp.getEncoded(), SECRET_KEY_ALGORITHM);
         } catch (Exception e) {
             throw new CryptoException("Secret key error", e);
         }

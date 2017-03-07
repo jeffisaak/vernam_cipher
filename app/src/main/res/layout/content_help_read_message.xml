@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Reading messages"
+            android:text="@string/help_read_message_read_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -29,14 +29,14 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="The decrypted content of the selected message is shown on this screen. If the message you are reading has just been decrypted, you may save the message plaintext; you may also share the message plaintext.  If a message is not saved or shared in some way, you will not be able to view the message plaintext again."
+            android:text="@string/help_read_message_read_content"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Saving messages"
+            android:text="@string/help_read_message_saving_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -44,23 +44,23 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="If the save icon is visible in the action bar, the message plaintext may be saved to the device. This allows you to return and read the message again later.  Any saved messages will be available to anybody that has access to your device; it is a security risk to save messages."
+            android:text="@string/help_read_message_saving_content"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Sharing messages"
+            android:text="@string/help_read_message_sharing_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
          <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:autoLink="web"
-            android:layout_marginTop="8dp"
-            android:text="Tap the share icon in the action bar to share the message plaintext using the available actions on your device, such as saving the message to the clipboard or sending it to someone via email or instant messaging."
-            android:textAppearance="?android:attr/textAppearanceSmall"/>
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:autoLink="web"
+             android:layout_marginTop="8dp"
+             android:text="@string/help_read_message_sharing_content"
+             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
     </LinearLayout>
 

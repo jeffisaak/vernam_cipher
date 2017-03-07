@@ -157,8 +157,7 @@ public class MessageDatabase extends AbstractDatabase {
         long id = cursor.getLong(cursor.getColumnIndex(ID));
         int incoming = cursor.getInt(cursor.getColumnIndex(INCOMING));
         String content = cursor.getString(cursor.getColumnIndex(CONTENT));
-        Message result = new Message(id, incoming == TRUE, content);
-        return result;
+        return new Message(id, incoming == TRUE, content);
     }
 
 }

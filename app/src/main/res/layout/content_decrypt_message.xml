@@ -23,7 +23,7 @@
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select key"
+            android:text="@string/select_key"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <Spinner
@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:ems="20"
             android:fontFamily="sans-serif"
-            android:hint="Password (if applicable)"
+            android:hint="@string/password_if_applicable"
             android:inputType="textPassword"
             android:nextFocusLeft="@id/key_password_edit_text"
             android:nextFocusUp="@id/key_password_edit_text"/>

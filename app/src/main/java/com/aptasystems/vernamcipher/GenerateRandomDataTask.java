@@ -3,7 +3,6 @@ package com.aptasystems.vernamcipher;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Queue;

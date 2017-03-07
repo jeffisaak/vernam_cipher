@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:fontFamily="sans-serif"
-            android:hint="Key password (if applicable)"
+            android:hint="@string/key_password_if_applicable"
             android:inputType="textPassword"/>
 
         <EditText
@@ -35,7 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:hint="Compose message"
+            android:hint="@string/compose_message"
             android:inputType="textCapSentences|textAutoCorrect|textMultiLine"/>
 
         <CheckBox
@@ -43,6 +43,6 @@
             android:id="@+id/check_box_save_message_copy"
             android:layout_height="wrap_content"
             android:onClick="toggleSaveMessage"
-            android:text="Save a copy of this message"/>
+            android:text="@string/save_a_copy"/>
     </LinearLayout>
 </ScrollView>

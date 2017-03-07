@@ -1,11 +1,8 @@
 package com.aptasystems.vernamcipher;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,17 +10,12 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.aptasystems.vernamcipher.database.SecretKeyDatabase;
 import com.aptasystems.vernamcipher.model.Message;
-import com.aptasystems.vernamcipher.model.SecretKey;
-
-import java.io.Serializable;
 
 public class MessagesFragment extends Fragment {
 
     private ListView _listView;
     private MessageListAdapter _listAdapter;
-    private TextView _noMessages;
 
     public MessagesFragment() {
         // Required empty public constructor
@@ -54,7 +46,7 @@ public class MessagesFragment extends Fragment {
         // Inflate the layout for this fragment
         View result = inflater.inflate(R.layout.fragment_messages, container, false);
 
-        _noMessages = (TextView) result.findViewById(R.id.text_view_no_messages);
+        TextView noMessages = (TextView) result.findViewById(R.id.text_view_no_messages);
 
         _listView = (ListView) result.findViewById(R.id.list_view_messages);
         _listAdapter = new MessageListAdapter(getContext());
@@ -73,7 +65,7 @@ public class MessagesFragment extends Fragment {
                 startActivity(readIntent);
             }
         });
-        _listView.setEmptyView(_noMessages);
+        _listView.setEmptyView(noMessages);
 
         return result;
     }

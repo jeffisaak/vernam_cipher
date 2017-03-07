@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,16 +16,12 @@ import com.aptasystems.vernamcipher.model.SecretKey;
 import com.aptasystems.vernamcipher.util.ShareUtil;
 
 import java.io.File;
-import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SecretKeyListFragment extends Fragment {
 
     private ListView _listView;
     private SecretKeyListAdapter _listAdapter;
-    private TextView _noSecretKeys;
 
     public SecretKeyListFragment() {
         // Required empty public constructor
@@ -56,7 +51,7 @@ public class SecretKeyListFragment extends Fragment {
         // Inflate the layout for this fragment
         View result = inflater.inflate(R.layout.fragment_secret_key_list, container, false);
 
-        _noSecretKeys = (TextView) result.findViewById(R.id.text_view_no_secret_keys);
+        TextView noSecretKeys = (TextView) result.findViewById(R.id.text_view_no_secret_keys);
 
         CoordinatorLayout coordinatorLayout = (CoordinatorLayout) getActivity().findViewById(R.id.layout_coordinator);
 
@@ -80,11 +75,11 @@ public class SecretKeyListFragment extends Fragment {
                 SecretKey keyWithData = SecretKeyDatabase.getInstance(getContext()).fetch(selectedKey.getId(), true);
 
                 Intent intent = new Intent(getActivity(), WriteMessageActivity.class);
-                intent.putExtra(WriteMessageActivity.EXTRA_KEY_SECRET_KEY, (Serializable) keyWithData);
+                intent.putExtra(WriteMessageActivity.EXTRA_KEY_SECRET_KEY, keyWithData);
                 startActivity(intent);
             }
         });
-        _listView.setEmptyView(_noSecretKeys);
+        _listView.setEmptyView(noSecretKeys);
 
         return result;
     }

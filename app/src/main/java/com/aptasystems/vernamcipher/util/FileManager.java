@@ -38,8 +38,7 @@ public class FileManager {
         if (!_tempFolder.exists()) {
             _tempFolder.mkdirs();
         }
-        File result = new File(_tempFolder, name);
-        return result;
+        return new File(_tempFolder, name);
     }
 
     /**
@@ -82,5 +81,5 @@ public class FileManager {
         return result;
     }
 
-    public static enum StorageState {NOT_AVAILABLE, WRITABLE, READ_ONLY}
+    public enum StorageState {NOT_AVAILABLE, WRITABLE, READ_ONLY}
 }

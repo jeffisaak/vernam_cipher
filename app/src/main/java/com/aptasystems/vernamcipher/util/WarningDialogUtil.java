@@ -49,9 +49,9 @@ public class WarningDialogUtil {
         }
     }
 
-    public static interface WarningDialogCallback {
-        public void onProceed();
+    public interface WarningDialogCallback {
+        void onProceed();
 
-        public void onCancel();
+        void onCancel();
     }
 }

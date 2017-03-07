@@ -1,9 +1,7 @@
 package com.aptasystems.vernamcipher;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -13,23 +11,19 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Base64;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.aptasystems.vernamcipher.database.MessageDatabase;
 import com.aptasystems.vernamcipher.database.SecretKeyDatabase;
 import com.aptasystems.vernamcipher.model.SecretKey;
 import com.aptasystems.vernamcipher.util.Crypto;
-import com.aptasystems.vernamcipher.util.FileManager;
 import com.aptasystems.vernamcipher.util.DialogUtil;
+import com.aptasystems.vernamcipher.util.FileManager;
 import com.aptasystems.vernamcipher.util.ShareUtil;
 
 import org.spongycastle.crypto.CryptoException;
@@ -37,14 +31,8 @@ import org.spongycastle.crypto.CryptoException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class WriteMessageActivity extends AppCompatActivity {
 
@@ -55,8 +43,6 @@ public class WriteMessageActivity extends AppCompatActivity {
     private static final int SHARE_REQUEST_CODE = 100;
 
     private CoordinatorLayout _coordinatorLayout;
-    private TextView _nameTextView;
-    private TextView _secretKeyDescriptionTextView;
     private TextView _bytesRemainingTextView;
     private EditText _keyPasswordEditText;
     private EditText _contentEditText;
@@ -76,23 +62,23 @@ public class WriteMessageActivity extends AppCompatActivity {
         SecretKey secretKey = (SecretKey) getIntent().getSerializableExtra(EXTRA_KEY_SECRET_KEY);
 
         _coordinatorLayout = (CoordinatorLayout) findViewById(R.id.layout_coordinator);
-        _nameTextView = (TextView) findViewById(R.id.text_view_filename);
-        _secretKeyDescriptionTextView = (TextView) findViewById(R.id.text_view_description);
+        TextView nameTextView = (TextView) findViewById(R.id.text_view_filename);
+        TextView secretKeyDescriptionTextView = (TextView) findViewById(R.id.text_view_description);
         _bytesRemainingTextView = (TextView) findViewById(R.id.text_view_bytes_remaining);
         _keyPasswordEditText = (EditText) findViewById(R.id.key_password_edit_text);
         _contentEditText = (EditText) findViewById(R.id.message_edit_text);
         _saveCopyCheckBox = (CheckBox) findViewById(R.id.check_box_save_message_copy);
 
         // Populate the key name.
-        _nameTextView.setText(secretKey.getName());
-        _nameTextView.setTextColor(secretKey.getColour());
+        nameTextView.setText(secretKey.getName());
+        nameTextView.setTextColor(secretKey.getColour());
 
         // Populate the key description
         if (TextUtils.getTrimmedLength(secretKey.getDescription()) > 0) {
-            _secretKeyDescriptionTextView.setVisibility(View.VISIBLE);
-            _secretKeyDescriptionTextView.setText(secretKey.getDescription());
+            secretKeyDescriptionTextView.setVisibility(View.VISIBLE);
+            secretKeyDescriptionTextView.setText(secretKey.getDescription());
         } else {
-            _secretKeyDescriptionTextView.setVisibility(View.GONE);
+            secretKeyDescriptionTextView.setVisibility(View.GONE);
         }
 
         _secretKeyLength = secretKey.getBytesRemaining();
@@ -215,7 +201,6 @@ public class WriteMessageActivity extends AppCompatActivity {
 
         // Ensure our message isn't too long.
         if (bytesRemaining < 0) {
-            // TODO - Add an action?
             Snackbar.make(_coordinatorLayout, R.string.message_too_long, Snackbar.LENGTH_SHORT)
                     .show();
             return;
@@ -282,8 +267,9 @@ public class WriteMessageActivity extends AppCompatActivity {
                 fos.write(cipherText);
                 fos.close();
             } catch (IOException e) {
-                // TODO - Handle exception appropriately.
-                e.printStackTrace();
+                Snackbar.make(_coordinatorLayout, R.string.snack_write_error, Snackbar.LENGTH_LONG)
+                        .show();
+                return;
             }
         }
 
@@ -301,16 +287,16 @@ public class WriteMessageActivity extends AppCompatActivity {
             String salt = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
             try {
                 keyFinal = Crypto.encryptToByteArray(password, salt, newKey);
+                SecretKeyDatabase.getInstance(this).updateKey(secretKey.getId(), keyFinal, newKey.length);
             } catch (CryptoException e) {
-                // TODO: Handle exception.
-                e.printStackTrace();
+                Snackbar.make(_coordinatorLayout, R.string.snack_key_encryption_error, Snackbar.LENGTH_SHORT).show();
+                return;
             }
         } else {
             // Not password-protected.
             keyFinal = newKey;
+            SecretKeyDatabase.getInstance(this).updateKey(secretKey.getId(), keyFinal, newKey.length);
         }
-
-        SecretKeyDatabase.getInstance(this).updateKey(secretKey.getId(), keyFinal, newKey.length);
 
         // Optionally save a copy of the message.
         if (_saveCopyCheckBox.isChecked()) {

@@ -1,7 +1,5 @@
 package com.aptasystems.vernamcipher.model;
 
-import java.io.Serializable;
-
 /**
  * Created by jisaak on 2016-03-02.
  */

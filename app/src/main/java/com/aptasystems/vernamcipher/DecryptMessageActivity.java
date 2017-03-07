@@ -8,7 +8,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -25,7 +24,6 @@ import org.spongycastle.crypto.CryptoException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +40,6 @@ public class DecryptMessageActivity extends AppCompatActivity {
 
     private CoordinatorLayout _coordinatorLayout;
     private Spinner _keySpinner;
-    private SecretKeyListAdapter _keySpinnerAdapter;
     private EditText _keyPasswordEditText;
 
     @Override
@@ -59,8 +56,8 @@ public class DecryptMessageActivity extends AppCompatActivity {
         _keyPasswordEditText = (EditText) findViewById(R.id.key_password_edit_text);
 
         // Set up the key spinner and select the appropriate entry.
-        _keySpinnerAdapter = new SecretKeyListAdapter(this);
-        _keySpinner.setAdapter(_keySpinnerAdapter);
+        SecretKeyListAdapter keySpinnerAdapter = new SecretKeyListAdapter(this);
+        _keySpinner.setAdapter(keySpinnerAdapter);
         int selectedSecretKey = 0;
         if (savedInstanceState != null) {
             selectedSecretKey = savedInstanceState.getInt(STATE_SECRET_KEY, selectedSecretKey);

@@ -10,8 +10,6 @@
     <color name="white_semi_transparent">#EEFFFFFF</color>
     <color name="black_semi_transparent">#B2000000</color>
 
-    <color name="grey_semi_transparent">#55000000</color>
-
     <color name="selected_key_background">#22000000</color>
 
     <color name="warning_label">#FF8000</color>

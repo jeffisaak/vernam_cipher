@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Introduction"
+            android:text="@string/help_main_introduction_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="This app allows you to create and share secret keys, then encrypt and decrypt messages using the Vernam Cipher and deliver them using the sharing capabilities of your device."
+            android:text="@string/help_main_introduction_content_1"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
@@ -37,14 +37,14 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="Wherever you see a question mark button in the title bar you may tap on it to get help for the screen you are in."
+            android:text="@string/help_main_introduction_content_2"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Secret keys"
+            android:text="@string/help_main_secret_keys_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -52,14 +52,14 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="Secret keys are used to encrypt and decrypt messages. The same key must be used to encrypt and decrypt the message, so before you encrypt and send a message, you must share the key with your intended recipient."
+            android:text="@string/help_main_secret_keys_content"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Creating keys"
+            android:text="@string/help_main_creating_keys_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -67,14 +67,14 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="To create a key, tap the add button on the main screen, then tap the \'New secret key\' button. Select the key length, enter or generate an optional password, and give the key an optional colour and description."
+            android:text="@string/help_main_creating_keys_content"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Sharing keys"
+            android:text="@string/help_main_sharing_keys_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -82,14 +82,14 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="Once you have created a key, it will be shown in your list of secret keys. To share it, press and hold on the key in the list until the title bar changes to indicate it is selected. Tap the share button, then tap the mechanism you'd like to share the key with. Android Beam is an excellent way to share secret keys."
+            android:text="@string/help_main_sharing_keys_content"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Importing keys"
+            android:text="@string/help_main_importing_keys_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -97,14 +97,14 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="If someone shares a key with you (via email, for example), you may open the key with the \'Import Vernam Cipher key\' app to import it into your secret key list. You may give it an optional description &amp; colour."
+            android:text="@string/help_main_importing_keys_content"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Messages"
+            android:text="@string/help_main_messages_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -112,28 +112,13 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="Messages that you have saved are shown in the messages list. You may tap on a message to view it or long-press on it to share or delete it."
+            android:text="@string/help_main_messages_content"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Encrypting &amp; sending messages"
-            android:layout_marginTop="8dp"
-            android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:autoLink="web"
-            android:layout_marginTop="8dp"
-            android:text="Once you have shared your key with someone, you may write them a message. Tap on the secret key to begin writing a message using that key."
-            android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Decrypting messages"
+            android:text="@string/help_main_encrypting_title"
             android:layout_marginTop="8dp"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
@@ -142,7 +127,22 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="When you receive an encrypted message (via an email attachment, for example), you may open the encrypted message with the \'Decrypt with Vernam Cipher\' app. This will allow you to read and optionally save the message."
+            android:text="@string/help_main_encrypting_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/help_main_decrypting_title"
+            android:layout_marginTop="8dp"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:layout_marginTop="8dp"
+            android:text="@string/help_main_decrypting_content_1"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
@@ -150,7 +150,7 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="You may also receive encrypted messages as text. To decrypt messages received as text, first select the text in whichever app you received it. If you are running Android Marshmallow or later, you may then tap the \'Share\' button that appears. If not, copy the text by tapping the \'Copy\' button, then open the Vernam Cipher app, tap the \'Add\' button on the bottom right, and tap the \'Decrypt clipboard\' button."
+            android:text="@string/help_main_decrypting_content_2"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
     </LinearLayout>

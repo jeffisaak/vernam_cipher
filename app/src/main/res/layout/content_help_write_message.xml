@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Writing messages"
+            android:text="@string/help_write_message_writing_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -29,14 +29,14 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="To write a message, tap in the \'Compose message\' area and begin typing. You will notice that as you type, the number of bytes remaining in the key changes. You may not write a message that is longer than the length of the key."
+            android:text="@string/help_write_message_writing_content"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Password-protected keys"
+            android:text="@string/help_write_message_password_keys_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="If the key is protected by a password, enter the password in the \'key password\' field."
+            android:text="@string/help_write_message_password_keys_content_1"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
@@ -52,29 +52,29 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="IMPORTANT: The app does not attempt to distinguish a password protected key from one that is not password protected, and if you do not enter a password for a key that is password protected, the password protected key will be used without decrypting it. This will break your key."
+            android:text="@string/help_write_message_password_keys_content_2"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Saving a copy of the message"
+            android:text="@string/help_write_message_saving_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
          <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:autoLink="web"
-            android:layout_marginTop="8dp"
-            android:text="If you want to save the message cleartext to your message list, check the appropriate box before sending the message. Doing so will give you the ability to go back and read your message later at the cost of security."
-            android:textAppearance="?android:attr/textAppearanceSmall"/>
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:autoLink="web"
+             android:layout_marginTop="8dp"
+             android:text="@string/help_write_message_saving_content"
+             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Sending the message"
+            android:text="@string/help_write_message_sending_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -82,7 +82,7 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="When you are finished writing your message, tap the send button at the top of the screen, then select how you would like to transmit the encrypted message. When you reach the point of selecting which app to use to send the message, the part of the key used to encrypt the message has been consumed."
+            android:text="@string/help_write_message_sending_content_1"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
@@ -90,14 +90,14 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="You may send messages using the sharing capabilities of your device. You may send the encrypted message either as a file or as text. Different sharing options will be available to you depending on which sending method you use and which apps you have installed on your device."
+            android:text="@string/help_write_message_sending_content_2"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Sending messages as files or text"
+            android:text="@string/help_write_message_sending_method_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -105,7 +105,7 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="Messages sent as files may be shared using applications that allow you to send files to people, such as email applications. When the recipient receives the file (in their email, for example), they may open the attachment using the \'Decrypt with Vernam Cipher\' application to decrypt the message."
+            android:text="@string/help_write_message_sending_method_content_1"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
@@ -113,14 +113,14 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="Messages sent as text may be shared using applications that allow you to save or send text, such as messaging applications. When your recipient receives the text, they may decrypt the message by selecting it and sharing it with the \'Decrypt with Vernam Cipher\' application (if using Android Marshmallow or later), or by copying the text and selecting the \'Decrypt clipboard\' button within the Vernam Cipher app."
+            android:text="@string/help_write_message_sending_method_content_2"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="What is key consumption?"
+            android:text="@string/help_write_message_key_consumption_title"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
@@ -128,7 +128,7 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:layout_marginTop="8dp"
-            android:text="This implementation of the Vernam cipher consumes part of the key when it is used. This means that once you encrypt or decrypt something with a key, the part of the key that is used is discarded. If this is not done and multiple encrypted messages are captured by an adversary, it may be possible for them to (partially) decrypt the messages. If, however, key data is only used once, decrypting messages without the secret key is impossible."
+            android:text="@string/help_write_message_key_consumption_content"
             android:textAppearance="?android:attr/textAppearanceSmall"/>
 
     </LinearLayout>
