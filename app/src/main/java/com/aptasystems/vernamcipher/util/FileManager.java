@@ -58,6 +58,10 @@ public class FileManager {
         Runnable cleanupRunnable = new Runnable() {
             @Override
             public void run() {
+                if( _tempFolder == null || !_tempFolder.exists() )
+                {
+                    return;
+                }
                 for (File file : _tempFolder.listFiles()) {
                     file.delete();
                 }
