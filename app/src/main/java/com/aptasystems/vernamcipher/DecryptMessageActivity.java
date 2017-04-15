@@ -3,6 +3,7 @@ package com.aptasystems.vernamcipher;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,7 +13,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.aptasystems.vernamcipher.database.SecretKeyDatabase;
 import com.aptasystems.vernamcipher.model.Message;
 import com.aptasystems.vernamcipher.model.SecretKey;
@@ -63,6 +67,25 @@ public class DecryptMessageActivity extends AppCompatActivity {
             selectedSecretKey = savedInstanceState.getInt(STATE_SECRET_KEY, selectedSecretKey);
         }
         _keySpinner.setSelection(selectedSecretKey);
+
+        // If there are no secret keys in the database, show a message and finish the activity.
+        List<SecretKey> secretKeys = SecretKeyDatabase.getInstance(this).list(false);
+        if (secretKeys.isEmpty()) {
+            MaterialDialog dialog = new MaterialDialog.Builder(this)
+                    .title(R.string.no_secret_keys_title)
+                    .cancelable(false)
+                    .customView(R.layout.dialog_message, true)
+                    .positiveText(android.R.string.ok)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            finish();
+                        }
+                    })
+                    .build();
+            ((TextView) dialog.findViewById(R.id.message_text)).setText(R.string.no_secret_keys_message);
+            dialog.show();
+        }
     }
 
     @Override

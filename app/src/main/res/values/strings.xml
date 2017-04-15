@@ -94,6 +94,9 @@
     <string name="select_key">Select key</string>
     <string name="password_if_applicable">Password (if applicable)</string>
 
+    <string name="no_secret_keys_title">No secret keys</string>
+    <string name="no_secret_keys_message">Before attempting to decrypt a message you must create or import a secret key.</string>
+
     <string name="error_reading_cipher_text">An error occurred while reading the encrypted message</string>
     <string name="error_secret_key_encryption_failed">Secret key encryption failed</string>
 
