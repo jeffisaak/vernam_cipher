@@ -236,14 +236,23 @@ public class ImportSecretKeyActivity extends AppCompatActivity {
 
         // If there is a semicolon in the filename, strip it and everything before it.
         if (filename.indexOf(";") > 0) {
-            filename = filename.substring(filename.indexOf(";")+1);
+            filename = filename.substring(filename.indexOf(";") + 1);
+        }
+
+        // If there is a dollar sign in the filename use it to determine the number of bytes remaining in the
+        // key, then strip it and everything after it.
+        Integer bytesRemaining = null;
+        if (filename.indexOf("$") > 0) {
+            String[] tokens = filename.split("\\$");
+            filename = tokens[0];
+            bytesRemaining = Integer.valueOf(tokens[1]);
         }
 
         // Get the selected colour.
         int colour = (int) findViewById(_selectedColour).getTag();
 
         // Insert the key into the database.
-        SecretKeyDatabase.getInstance(this).insert(filename, colour, _descriptionEditText.getText().toString(), keyData);
+        SecretKeyDatabase.getInstance(this).insert(filename, colour, _descriptionEditText.getText().toString(), keyData, bytesRemaining != null ? bytesRemaining : keyData.length);
 
         finish();
     }

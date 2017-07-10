@@ -49,7 +49,7 @@ public class SecretKeyDatabase extends AbstractDatabase {
         _context = context;
     }
 
-    public long insert(String name, int colour, String description, byte[] keyData) {
+    public long insert(String name, int colour, String description, byte[] keyData, int keyLength) {
         DBHelper dbHelper = new DBHelper(_context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
@@ -58,7 +58,7 @@ public class SecretKeyDatabase extends AbstractDatabase {
         cv.put(COLOUR, colour);
         cv.put(DESCRIPTION, description);
         cv.put(KEY, keyData);
-        cv.put(BYTES_REMAINING, keyData.length);
+        cv.put(BYTES_REMAINING, keyLength);
         long rid = db.insert(TABLE, null, cv);
 
         if( CLOSE_DB_WHEN_COMPLETE ) {

@@ -148,6 +148,17 @@
                 <data android:mimeType="text/plain"/>
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ViewSecretKeyActivity"
+            android:label="@string/title_activity_view_secret_key"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.aptasystems.vernamcipher.MainActivity"/>
+        </activity>
+
     </application>
 
 </manifest>

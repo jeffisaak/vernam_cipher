@@ -25,6 +25,8 @@ public abstract class SecretKeyListChoiceListener implements AbsListView.MultiCh
     private CoordinatorLayout _coordinatorLayout;
     private ListView _listView;
 
+    private MenuItem _viewSecretKeyMenuItem;
+
     public SecretKeyListChoiceListener(CoordinatorLayout coordinatorLayout, ListView listView) {
         _coordinatorLayout = coordinatorLayout;
         _listView = listView;
@@ -97,6 +99,24 @@ public abstract class SecretKeyListChoiceListener implements AbsListView.MultiCh
                 mode.finish();
                 return true;
             }
+            case R.id.action_view_secret_key: {
+
+                // Should only be one checked.
+                SecretKey selectedKey = null;
+                int len = _listView.getCount();
+                SparseBooleanArray checked = _listView.getCheckedItemPositions();
+                for (int ii = 0; ii < len; ii++) {
+                    if (checked.get(ii)) {
+                        selectedKey = (SecretKey) _listView.getItemAtPosition(ii);
+                    }
+                }
+
+                if (selectedKey != null) {
+                    mode.finish();
+                    startViewKeyActivity(selectedKey);
+                }
+                return true;
+            }
             default:
                 return false;
         }
@@ -109,7 +129,7 @@ public abstract class SecretKeyListChoiceListener implements AbsListView.MultiCh
             // Get the secret key with the key data.
             SecretKey secretKey = SecretKeyDatabase.getInstance(_listView.getContext()).fetch(selectedItem.getId(), true);
 
-            File file = FileManager.getInstance(_listView.getContext()).newTempFile(secretKey.getId() + ";" + secretKey.getName());
+            File file = FileManager.getInstance(_listView.getContext()).newTempFile(secretKey.getId() + ";" + secretKey.getName() + "$" + secretKey.getBytesRemaining());
             FileOutputStream outStream = new FileOutputStream(file);
             outStream.write(secretKey.getKey());
             outStream.close();
@@ -125,6 +145,10 @@ public abstract class SecretKeyListChoiceListener implements AbsListView.MultiCh
         MenuInflater inflater = mode.getMenuInflater();
         inflater.inflate(R.menu.menu_selected_secret_keys, menu);
 
+        // Save the view secret key menu item so that we can show/hide it based on the number
+        // of keys selected.
+        _viewSecretKeyMenuItem = menu.findItem(R.id.action_view_secret_key);
+
         updateTitleText(mode);
 
         return true;
@@ -134,6 +158,10 @@ public abstract class SecretKeyListChoiceListener implements AbsListView.MultiCh
         String titleText = String.format(_listView.getContext().getString(R.string.secret_keys_selected),
                 _listView.getCheckedItemCount());
         mode.setTitle(titleText);
+
+        // I know this isn't title text related, but I want to hide the "view secret key" menu
+        // item if more than one secret key is selected.  Doing it here.
+        _viewSecretKeyMenuItem.setVisible(_listView.getCheckedItemCount() == 1);
     }
 
     @Override
@@ -147,6 +175,8 @@ public abstract class SecretKeyListChoiceListener implements AbsListView.MultiCh
         // an invalidate() request
         return false;
     }
+
+    protected abstract void startViewKeyActivity(SecretKey selectedKey);
 
     protected abstract void startShareActivity(List<File> files);
 }

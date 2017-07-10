@@ -66,6 +66,15 @@ public class SecretKeyListFragment extends Fragment {
                 Intent chooserIntent = Intent.createChooser(shareIntent, "Share secret key");
                 startActivity(chooserIntent);
             }
+
+            @Override
+            protected void startViewKeyActivity(SecretKey selectedKey) {
+                SecretKey keyWithData = SecretKeyDatabase.getInstance(getContext()).fetch(selectedKey.getId(), true);
+
+                Intent intent = new Intent(getActivity(), ViewSecretKeyActivity.class);
+                intent.putExtra(WriteMessageActivity.EXTRA_KEY_SECRET_KEY, keyWithData);
+                startActivity(intent);
+            }
         };
         _listView.setMultiChoiceModeListener(choiceListener);
         _listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

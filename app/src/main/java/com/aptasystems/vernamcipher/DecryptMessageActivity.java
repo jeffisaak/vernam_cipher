@@ -45,6 +45,7 @@ public class DecryptMessageActivity extends AppCompatActivity {
     private CoordinatorLayout _coordinatorLayout;
     private Spinner _keySpinner;
     private EditText _keyPasswordEditText;
+    private TextView _cipherTextTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +59,7 @@ public class DecryptMessageActivity extends AppCompatActivity {
         _coordinatorLayout = (CoordinatorLayout) findViewById(R.id.layout_coordinator);
         _keySpinner = (Spinner) findViewById(R.id.key_spinner);
         _keyPasswordEditText = (EditText) findViewById(R.id.key_password_edit_text);
+        _cipherTextTextView = (TextView) findViewById(R.id.cipher_text_text_view);
 
         // Set up the key spinner and select the appropriate entry.
         SecretKeyListAdapter keySpinnerAdapter = new SecretKeyListAdapter(this);
@@ -67,6 +69,14 @@ public class DecryptMessageActivity extends AppCompatActivity {
             selectedSecretKey = savedInstanceState.getInt(STATE_SECRET_KEY, selectedSecretKey);
         }
         _keySpinner.setSelection(selectedSecretKey);
+
+        // Populate the cipher text text view.
+        byte[] cipherText = getCipherTextFromIntent();
+        if (cipherText != null) {
+            // Base64 encode so we have "pretty" text instead of unprintable characters.
+            String cipherStringBase64 = new String(Base64.encode(cipherText, Base64.DEFAULT), UTF8_CHARSET);
+            _cipherTextTextView.setText(cipherStringBase64);
+        }
 
         // If there are no secret keys in the database, show a message and finish the activity.
         List<SecretKey> secretKeys = SecretKeyDatabase.getInstance(this).list(false);
@@ -88,21 +98,7 @@ public class DecryptMessageActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_decrypt_message, menu);
-        return true;
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(STATE_SECRET_KEY, _keySpinner.getSelectedItemPosition());
-    }
-
-    public void decryptMessage(MenuItem menuItem) {
-
+    private byte[] getCipherTextFromIntent() {
         String action = getIntent().getAction();
 
         // Depending on how the share happened, we may either have a single URI, a list of URIs,
@@ -134,14 +130,57 @@ public class DecryptMessageActivity extends AppCompatActivity {
                 break;
         }
 
-        // If the list of URIs is empty, this does nothing.
-        for (Uri uri : uris) {
-            decryptMessage(uri);
+        // Either the list of URIs will be populated or the base64CipherText will be populated.
+        // Get the cipher text from either the URI list or the base64CipherText.
+        // The list of URIs should only ever have a single entry.
+        byte[] cipherText = null;
+        if (uris.size() == 1) {
+            // Get the message content to decrypt.
+            try {
+                ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+                InputStream inStream = getContentResolver().openInputStream(uris.get(0));
+                int nRead;
+                byte[] data = new byte[BYTE_BUFFER_SIZE];
+                while ((nRead = inStream.read(data, 0, data.length)) != -1) {
+                    outStream.write(data, 0, nRead);
+                }
+                outStream.flush();
+                cipherText = outStream.toByteArray();
+            } catch (IOException e) {
+                Snackbar snackbar = Snackbar
+                        .make(_coordinatorLayout, R.string.error_reading_cipher_text, Snackbar.LENGTH_LONG);
+                snackbar.show();
+            }
+        } else if (base64CipherText != null) {
+            try {
+                cipherText = Base64.decode(base64CipherText, Base64.DEFAULT);
+            } catch (IllegalArgumentException e) {
+                // Not Base64 encoded text.
+                Snackbar snackbar = Snackbar
+                        .make(_coordinatorLayout, R.string.error_invalid_cipher_text, Snackbar.LENGTH_LONG);
+                snackbar.show();
+            }
         }
 
-        // If we have base64 encoded cipher text, decode and decrypt.
-        if (base64CipherText != null) {
-            byte[] cipherText = Base64.decode(base64CipherText, Base64.DEFAULT);
+        return cipherText;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_decrypt_message, menu);
+        return true;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_SECRET_KEY, _keySpinner.getSelectedItemPosition());
+    }
+
+    public void decryptMessage(MenuItem menuItem) {
+        byte[] cipherText = getCipherTextFromIntent();
+        if (cipherText != null) {
             decryptMessage(cipherText);
         }
     }
@@ -180,55 +219,6 @@ public class DecryptMessageActivity extends AppCompatActivity {
         byte[] key = decryptKeyIfNecessary(secretKey);
         if (key == null) {
             return;
-        }
-
-        // Show a warning dialog.  Maybe.
-        final byte[] finalKey = key;
-        final byte[] finalCipherText = cipherText;
-        DialogUtil.showWarningDialog(this,
-                R.string.decrypt_message_warning_title,
-                R.string.decrypt_message_warning_text,
-                DECRYPT_MESSAGE_WARNING,
-                new DialogUtil.WarningDialogCallback() {
-                    @Override
-                    public void onProceed() {
-                        decryptMessage(secretKey, finalKey, finalCipherText);
-                    }
-
-                    @Override
-                    public void onCancel() {
-                        // Noop.
-                    }
-                });
-    }
-
-    private void decryptMessage(Uri uri) {
-
-        SecretKey selectedSecretKey = (SecretKey) _keySpinner.getSelectedItem();
-        final SecretKey secretKey = SecretKeyDatabase.getInstance(this).fetch(selectedSecretKey.getId(), true);
-
-        // Decrypt the key if necessary.
-        byte[] key = decryptKeyIfNecessary(secretKey);
-        if (key == null) {
-            return;
-        }
-
-        // Get the message content to decrypt.
-        byte[] cipherText = null;
-        try {
-            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-            InputStream inStream = getContentResolver().openInputStream(uri);
-            int nRead;
-            byte[] data = new byte[BYTE_BUFFER_SIZE];
-            while ((nRead = inStream.read(data, 0, data.length)) != -1) {
-                outStream.write(data, 0, nRead);
-            }
-            outStream.flush();
-            cipherText = outStream.toByteArray();
-        } catch (IOException e) {
-            Snackbar snackbar = Snackbar
-                    .make(_coordinatorLayout, R.string.error_reading_cipher_text, Snackbar.LENGTH_LONG);
-            snackbar.show();
         }
 
         // Show a warning dialog.  Maybe.

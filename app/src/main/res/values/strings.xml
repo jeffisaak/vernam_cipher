@@ -85,11 +85,13 @@
     <string name="key_password_if_applicable">Key Password (if applicable)</string>
     <string name="snack_write_error">Unable to write the ciphertext data file</string>
     <string name="snack_key_encryption_error">Key encryption failed</string>
+    <string name="intent_encrypt">Encrypt with Vernam Cipher</string>
 
     <!-- Decrypt Message activity -->
     <string name="title_activity_decrypt_message">Decrypt Message</string>
     <string name="action_decrypt">Decrypt</string>
     <string name="intent_decrypt">Decrypt with Vernam Cipher</string>
+    <string name="cipher_text_label">Cipher text:</string>
 
     <string name="select_key">Select key</string>
     <string name="password_if_applicable">Password (if applicable)</string>
@@ -97,6 +99,7 @@
     <string name="no_secret_keys_title">No secret keys</string>
     <string name="no_secret_keys_message">Before attempting to decrypt a message you must create or import a secret key.</string>
 
+    <string name="error_invalid_cipher_text">The cipher text appears to be invalid</string>
     <string name="error_reading_cipher_text">An error occurred while reading the encrypted message</string>
     <string name="error_secret_key_encryption_failed">Secret key encryption failed</string>
 
@@ -149,6 +152,18 @@
     <string name="help_main_decrypting_content_1">When you receive an encrypted message (via an email attachment, for example), you may open the encrypted message with the \'Decrypt with Vernam Cipher\' app. This will allow you to read and optionally save the message.</string>
     <string name="help_main_decrypting_content_2">You may also receive encrypted messages as text. To decrypt messages received as text, first select the text in whichever app you received it. If you are running Android Marshmallow or later, you may then tap the \'Share\' button that appears. If not, copy the text by tapping the \'Copy\' button, then open the Vernam Cipher app, tap the \'Add\' button on the bottom right, and tap the \'Decrypt clipboard\' button.</string>
 
+    <!-- View Secret Key Activity -->
+    <string name="title_activity_view_secret_key">View Secret Key</string>
+    <string name="show_key_data">Show key data</string>
+    <string name="progress_dialog_formatting_secret_key">Formatting secret key</string>
+    <string name="view_secret_key_instructions">Please enter the key password (if applicable) and tap the Hex or Base64 buttons to view the secret key.</string>
+    <string name="menu_item_hexadecimal">Hex</string>
+    <string name="menu_item_base64">Base64</string>
+
+    <!-- Bytes remaining bug info activity -->
+    <string name="bytes_remaining_bug_info_problem_title">What\'s the problem?</string>
+    <string name="bytes_remaining_bug_info_problem_content">There is a bug in the previous version of this app</string>
+
     <!-- Warning dialogs (shared) -->
     <string name="do_not_show_warning">Do not show this warning again</string>
 
@@ -184,6 +199,11 @@
     <!-- Select messages -->
     <string name="select_all_messages">Select all</string>
     <string name="delete_messages">Delete</string>
+    <string name="view_secret_key">View secret key</string>
+
+    <!-- Snackbar warning messages -->
+    <string name="bytes_remaining_count_bug">You may want to recreate your secret keys due to a (now-fixed) bug.</string>
+    <string name="bytes_remaining_count_bug_action">More</string>
 
     <!-- Unsorted -->
     <string name="save_decrypted_message">Save</string>

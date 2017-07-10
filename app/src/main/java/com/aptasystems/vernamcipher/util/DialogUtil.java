@@ -65,8 +65,8 @@ public class DialogUtil {
 
         // Show a warning dialog if the user hasn't turned it off yet.
         final SharedPreferences prefs = context.getSharedPreferences(context.getPackageName(), Activity.MODE_PRIVATE);
-        boolean hideClipboardWarning = prefs.getBoolean(preferenceName, false);
-        if (!hideClipboardWarning) {
+        boolean hideWarning = prefs.getBoolean(preferenceName, false);
+        if (!hideWarning) {
             MaterialDialog dialog = new MaterialDialog.Builder(context)
                     .title(titleResId)
                     .customView(R.layout.dialog_warning, true)

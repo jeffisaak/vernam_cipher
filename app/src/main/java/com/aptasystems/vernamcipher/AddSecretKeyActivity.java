@@ -585,7 +585,7 @@ public class AddSecretKeyActivity extends AppCompatActivity {
                     @Override
                     protected void onPostExecute(byte[] byteArray) {
                         if (!isCancelled() && byteArray != null) {
-                            finishCreateKey(byteArray);
+                            finishCreateKey(byteArray, length);
                         } else if (byteArray == null) {
                             Snackbar.make(_coordinatorLayout, R.string.toast_secret_key_generation_failed, Snackbar.LENGTH_LONG).show();
                         }
@@ -689,7 +689,7 @@ public class AddSecretKeyActivity extends AppCompatActivity {
                     @Override
                     protected void onPostExecute(byte[] byteArray) {
                         if (!isCancelled() && byteArray != null && _success) {
-                            finishCreateKey(byteArray);
+                            finishCreateKey(byteArray, length);
                         } else if (!_success) {
                             Resources res = AddSecretKeyActivity.this.getResources();
                             String errorMessage = String.format(res.getString(R.string.random_org_error), _errorMessage);
@@ -701,7 +701,7 @@ public class AddSecretKeyActivity extends AppCompatActivity {
         task.execute(length);
     }
 
-    private void finishCreateKey(byte[] key) {
+    private void finishCreateKey(byte[] key, int keyLength) {
         byte[] keyFinal = null;
 
         // Encrypt the key if password-protected.
@@ -723,7 +723,7 @@ public class AddSecretKeyActivity extends AppCompatActivity {
 
         int colour = (int) findViewById(_selectedColour).getTag();
 
-        SecretKeyDatabase.getInstance(this).insert(UUID.randomUUID().toString(), colour, _descriptionEditText.getText().toString(), keyFinal);
+        SecretKeyDatabase.getInstance(this).insert(UUID.randomUUID().toString(), colour, _descriptionEditText.getText().toString(), keyFinal, keyLength);
 
         finish();
     }
