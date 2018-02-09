@@ -8,8 +8,8 @@ android {
         applicationId "com.aptasystems.vernamcipher"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 8
-        versionName "1.7"
+        versionCode 9
+        versionName "1.8"
     }
     buildTypes {
         release {
