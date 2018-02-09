@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.aptasystems.vernamcipher.model.SecretKey;
 import com.aptasystems.vernamcipher.util.Crypto;
+import com.aptasystems.vernamcipher.util.HashUtil;
 
 import org.spongycastle.crypto.CryptoException;
 
@@ -124,7 +125,8 @@ public class ViewSecretKeyActivity extends AppCompatActivity {
         String password = _keyPasswordEditText.getText().toString();
         if (password.length() > 0) {
             try {
-                String salt = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+                // Hash the password and use it as the salt.
+                String salt = HashUtil.hashPassword(password);
                 decryptedData = Crypto.decryptToByteArray(password, salt, secretKey.getKey());
             } catch (CryptoException e) {
 

@@ -24,6 +24,7 @@ import com.aptasystems.vernamcipher.model.SecretKey;
 import com.aptasystems.vernamcipher.util.Crypto;
 import com.aptasystems.vernamcipher.util.DialogUtil;
 import com.aptasystems.vernamcipher.util.FileManager;
+import com.aptasystems.vernamcipher.util.HashUtil;
 import com.aptasystems.vernamcipher.util.ShareUtil;
 
 import org.spongycastle.crypto.CryptoException;
@@ -213,7 +214,7 @@ public class WriteMessageActivity extends AppCompatActivity {
         String password = _keyPasswordEditText.getText().toString();
         if (password.length() > 0) {
             try {
-                String salt = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+                String salt = HashUtil.hashPassword(password);
                 decryptedData = Crypto.decryptToByteArray(password, salt, secretKey.getKey());
             } catch (CryptoException e) {
 
@@ -284,7 +285,8 @@ public class WriteMessageActivity extends AppCompatActivity {
         byte[] keyFinal = null;
         if (_keyPasswordEditText.getText().toString().length() != 0) {
             String password = _keyPasswordEditText.getText().toString();
-            String salt = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+            // Hash the password and use it as the salt.
+            String salt = HashUtil.hashPassword(password);
             try {
                 keyFinal = Crypto.encryptToByteArray(password, salt, newKey);
                 SecretKeyDatabase.getInstance(this).updateKey(secretKey.getId(), keyFinal, newKey.length);

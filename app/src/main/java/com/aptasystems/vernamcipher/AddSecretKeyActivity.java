@@ -35,6 +35,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.aptasystems.vernamcipher.database.SecretKeyDatabase;
 import com.aptasystems.vernamcipher.util.Crypto;
+import com.aptasystems.vernamcipher.util.HashUtil;
 
 import org.spongycastle.crypto.CryptoException;
 
@@ -708,7 +709,8 @@ public class AddSecretKeyActivity extends AppCompatActivity {
         boolean passwordProtected = _passwordMechanismDiceware.isChecked() || _passwordMechanismEnter.isChecked();
         if (passwordProtected) {
             String password = _passwordEditText.getText().toString();
-            String salt = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+            // Hash the password and use it as the salt.
+            String salt = HashUtil.hashPassword(password);
             try {
                 keyFinal = Crypto.encryptToByteArray(password, salt, key);
             } catch (CryptoException e) {

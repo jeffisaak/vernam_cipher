@@ -22,6 +22,7 @@ import com.aptasystems.vernamcipher.model.Message;
 import com.aptasystems.vernamcipher.model.SecretKey;
 import com.aptasystems.vernamcipher.util.Crypto;
 import com.aptasystems.vernamcipher.util.DialogUtil;
+import com.aptasystems.vernamcipher.util.HashUtil;
 
 import org.spongycastle.crypto.CryptoException;
 
@@ -188,13 +189,12 @@ public class DecryptMessageActivity extends AppCompatActivity {
     private byte[] decryptKeyIfNecessary(final SecretKey secretKey) {
 
         // Attempt to decrypt the key if a password is provided.  If that fails, we can't go further.
-        byte[] decryptedKey = null;
         String password = _keyPasswordEditText.getText().toString();
         if (password.length() > 0) {
             try {
-                String salt = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-                decryptedKey = Crypto.decryptToByteArray(password, salt, secretKey.getKey());
-                return decryptedKey;
+                // Hash the password and use it as the salt.
+                String salt = HashUtil.hashPassword(password);
+                return Crypto.decryptToByteArray(password, salt, secretKey.getKey());
             } catch (CryptoException e) {
 
                 // Decryption failed.  Show a snackbar and put a validation error in the field.
@@ -259,7 +259,8 @@ public class DecryptMessageActivity extends AppCompatActivity {
         byte[] keyFinal = null;
         if (_keyPasswordEditText.getText().toString().length() != 0) {
             String password = _keyPasswordEditText.getText().toString();
-            String salt = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+            // Hash the password and use it as the salt.
+            String salt = HashUtil.hashPassword(password);
             try {
                 keyFinal = Crypto.encryptToByteArray(password, salt, newKey);
             } catch (CryptoException e) {
