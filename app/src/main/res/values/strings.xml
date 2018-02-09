@@ -184,6 +184,10 @@
     <string name="external_storage_alert_read_only_text">External storage is read only; key sharing and message sending functions are not available.</string>
     <string name="external_storage_alert_not_available_text">External storage is not available; key sharing and message sending functions are not available.</string>
 
+    <!--Alert dialog - broken secret keys-->
+    <string name="broken_secret_keys_title">Password protected secret keys</string>
+    <string name="broken_secret_keys_text">In a recent update, a bug that was causing password protected secret keys to not work properly was fixed. Unfortunately, a side effect of the fix is that all current password protected secret keys are now broken and should not be used. Please create new password protected secret keys. Humble apologies for the inconvenience.</string>
+
     <!-- Alert dialog - import key error -->
     <string name="import_key_error_alert_title">Error importing key</string>
     <string name="import_key_error_alert_content">An error occurred while importing the secret key: %1$s</string>
