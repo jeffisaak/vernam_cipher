@@ -245,7 +245,7 @@ public class ImportSecretKeyActivity extends AppCompatActivity {
         if (filename.indexOf("$") > 0) {
             String[] tokens = filename.split("\\$");
             filename = tokens[0];
-            bytesRemaining = Integer.valueOf(tokens[1]);
+            bytesRemaining = Integer.valueOf(tokens[1].replaceAll("\\.bin", ""));
         }
 
         // Get the selected colour.
