@@ -77,17 +77,6 @@ public class MainActivity extends AppCompatActivity {
             FileManager.getInstance(this).cleanup();
         }
 
-        // Show a message one time to let the user know that their password protected secret keys are broken.
-        if (!getPreferences(MODE_PRIVATE).getBoolean(PREF_SECRET_KEYS_BROKEN_MESSAGE, false)) {
-            getPreferences(MODE_PRIVATE).edit().putBoolean(PREF_SECRET_KEYS_BROKEN_MESSAGE, true).commit();
-            new MaterialDialog.Builder(this)
-                    .title(R.string.broken_secret_keys_title)
-                    .content(R.string.broken_secret_keys_text)
-                    .positiveText(android.R.string.ok)
-                    .build()
-                    .show();
-        }
-
     }
 
     @Override
