@@ -182,7 +182,16 @@ public class DecryptMessageActivity extends AppCompatActivity {
     public void decryptMessage(MenuItem menuItem) {
         byte[] cipherText = getCipherTextFromIntent();
         if (cipherText != null) {
-            decryptMessage(cipherText);
+
+            // Ensure that the selected secret key has enough data to decrypt the cipher text.
+            SecretKey selectedSecretKey = (SecretKey) _keySpinner.getSelectedItem();
+            if (selectedSecretKey.getBytesRemaining() < cipherText.length) {
+                Snackbar snackbar = Snackbar
+                        .make(_coordinatorLayout, R.string.error_key_length, Snackbar.LENGTH_LONG);
+                snackbar.show();
+            } else {
+                decryptMessage(cipherText);
+            }
         }
     }
 
