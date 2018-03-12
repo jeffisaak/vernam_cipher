@@ -115,6 +115,12 @@ public class MainActivity extends AppCompatActivity {
         // Ensure that there is something on the clipboard that we can decrypt.
         ClipboardManager clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
         ClipData clipData = clipboardManager.getPrimaryClip();
+        if (clipData == null) {
+            Snackbar.make(_coordinatorLayout, R.string.snack_no_clip_text, Snackbar.LENGTH_LONG)
+                    .show();
+            return;
+        }
+
         String clipText = null;
         for (int ii = 0; ii < clipData.getItemCount(); ii++) {
             ClipData.Item item = clipData.getItemAt(ii);
