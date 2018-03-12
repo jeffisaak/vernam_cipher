@@ -468,7 +468,7 @@ public class AddSecretKeyActivity extends AppCompatActivity {
     }
 
     /**
-     * Launch the dieware password generation app to generate a password and return.
+     * Launch the diceware password generation app to generate a password and return.
      *
      * @param view
      */
