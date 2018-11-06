@@ -123,7 +123,7 @@
     <string name="info_open_source_content_2">Please note that the source code has not been audited by an independent third party. If you or your organisation are interested in performing an audit, please contact me, my email address may be found at the bottom of this page.</string>
     <string name="info_who_title">Who wrote this app?</string>
     <string name="info_who_content_1">My name is Jeff Isaak. My background is software development. I am passionate about online security and privacy, personal finance, and garlic. I want to help people reclaim their privacy through clever software. My email address is jisaak@aptasystems.com.</string>
-    <string name="info_who_content_2">If you use this app and like it, please consider donating: https://www.jeffisaak.ca/donate</string>
+    <string name="info_who_content_2">Feel free to visit my web site: https://www.jeffisaak.ca</string>
     <string name="info_what_title">What does this app do?</string>
     <string name="info_what_content">This app allows you to create and share secret keys, then encrypt and decrypt messages using the Vernam Cipher and deliver them using the sharing capabilities of your device.</string>
     <string name="info_key_consumption_title">A word about key consumption</string>
