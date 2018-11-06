@@ -224,6 +224,14 @@ public class DecryptMessageActivity extends AppCompatActivity {
         SecretKey selectedSecretKey = (SecretKey) _keySpinner.getSelectedItem();
         final SecretKey secretKey = SecretKeyDatabase.getInstance(this).fetch(selectedSecretKey.getId(), true);
 
+        // Not sure how this happens, but it's happening...
+        if (secretKey == null) {
+            Snackbar snackbar = Snackbar
+                    .make(_coordinatorLayout, R.string.error_missing_secret_key, Snackbar.LENGTH_LONG);
+            snackbar.show();
+            return;
+        }
+
         // Decrypt the key if necessary.
         byte[] key = decryptKeyIfNecessary(secretKey);
         if (key == null) {

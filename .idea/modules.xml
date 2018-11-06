@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/VernamCipherMk5.iml" filepath="$PROJECT_DIR$/VernamCipherMk5.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/vernamcipher.iml" filepath="$PROJECT_DIR$/vernamcipher.iml" />
     </modules>
   </component>
 </project>

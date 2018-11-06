@@ -103,6 +103,7 @@
     <string name="error_reading_cipher_text">An error occurred while reading the encrypted message</string>
     <string name="error_secret_key_encryption_failed">Secret key encryption failed</string>
     <string name="error_key_length">The selected secret key is not long enough to decrypt the message</string>
+    <string name="error_missing_secret_key">The selected secret key does not appear to exist</string>
 
     <!-- Read Message activity -->
     <string name="title_activity_read_message">Read Message</string>
